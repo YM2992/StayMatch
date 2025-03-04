@@ -1,0 +1,16 @@
+{
+  "name": "staymatch",
+  "version": "1.0.0",
+  "description": "A hotel and accommodation finder.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "mssql": "^11.0.1",
+    "react": "^19.0.0"
+  }
+}
