@@ -1,8 +1,7 @@
 require('dotenv').config();
 
 const currentTime = new Date();
-console.log(`Current Time: ${currentTime}`);
-console.log(process.env.TRIPADVISOR_API_KEY);
+console.log(`Server starting: ${currentTime}`);
 // Importing required modules
 const express = require('express');
 const cors = require('cors');
