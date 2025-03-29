@@ -29,7 +29,14 @@ const AzureService = new Azure({
 }, {});
 
 
-// start server
+// API server
+const routes = require('./routes').default;
+
+routes.forEach(route => {
+    app[route.method.toLowerCase()](route.path, route.handler);
+});
+
+
 const PORT = process.env.SERVER_PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
