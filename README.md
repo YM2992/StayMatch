@@ -12,4 +12,12 @@ npm install .
 ```
 
 ## Running
+### Frontend
+```
+npm start frontend
+```
 
+### Backend
+```
+npm start backend
+```
