@@ -5,15 +5,13 @@ console.log(`Server starting: ${currentTime}`);
 // Importing required modules
 const express = require('express');
 const cors = require('cors');
-// const bodyParser = require('body-parser');
-// const path = require('path');
 
 const app = express();
 app.use(cors({ origin: '*' }));
 
 // import local modules
-const TripAdvisorAPI = require('./TripAdvisor');
-const Azure = require('./Azure');
+const TripAdvisorAPI = require('./Modules/TripAdvisor');
+const Azure = require('./Modules/Azure');
 
 // initialising API modules
 const TripAdvisor = new TripAdvisorAPI(process.env.TRIPADVISOR_API_KEY);
@@ -29,6 +27,13 @@ const AzureService = new Azure({
         encrypt: true
     }
 }, {});
+
+
+// start server
+const PORT = process.env.SERVER_PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});
 
 
 /* TripAdvisor API usage example */
