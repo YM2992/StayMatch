@@ -6,8 +6,8 @@
   "private": true,
   "scripts": {
     "backend": "nodemon backend/server.js",
-    "frontend": "vite",
-    "dev": "vite",
+    "frontend": "vite frontend",
+    "dev": "vite frontend",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
@@ -15,8 +15,8 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "main": "index.js",
   "dependencies": {
+    "@tailwindcss/vite": "^4.0.17",
     "axios": "^1.8.4",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
@@ -24,7 +24,6 @@
     "mssql": "^11.0.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "@tailwindcss/vite": "^4.0.17",
     "tailwindcss": "^4.0.17"
   },
   "devDependencies": {
@@ -36,7 +35,7 @@
     "eslint-plugin-react-hooks": "^5.1.0",
     "eslint-plugin-react-refresh": "^0.4.19",
     "globals": "^15.15.0",
-    "vite": "^6.2.0"
+    "vite": "^6.2.3"
   },
   "repository": {
     "type": "git",
