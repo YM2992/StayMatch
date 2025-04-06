@@ -1,3 +1,5 @@
+import { authenticateUser, registerUser, updateUser } from './Handlers/userHandler.js';
+
 const apiPath = '/api';
 const routes = [
     /* User */
@@ -5,14 +7,60 @@ const routes = [
         path: `${apiPath}/user/register`,
         method: 'post',
         handler: async (req, res) => {
+            const { email, password, first_name, last_name } = req.body;
 
+            if (!email || !password || !first_name || !last_name) {
+                return res.status(400).json({ error: 'All fields are required' });
+            }
+
+            try {
+                const userId = await registerUser({ email, password, first_name, last_name });
+                return res.status(201).json({ message: 'User registered successfully', userId });
+            } catch (error) {
+                return res.status(500).json({ error: 'An error occurred during registration' });
+            }
         }
     },
     {
         path: `${apiPath}/user/login`,
-        method: 'get',
-        handler: (req, res) => {
-            res.json({ message: 'User route' });
+        method: 'post',
+        handler: async (req, res) => {
+            const { username, password } = req.body;
+
+            if (!username || !password) {
+                return res.status(400).json({ error: 'Username and password are required' });
+            }
+
+            try {
+                // Replace with actual authentication logic
+                const user = await authenticateUser(username, password);
+
+                if (!user) {
+                    return res.status(401).json({ error: 'Invalid credentials' });
+                }
+
+                return res.status(200).json({ message: 'Login successful', user });
+            } catch (error) {
+                return res.status(500).json({ error: 'An error occurred during login' });
+            }
+        }
+    },
+    {
+        path: `${apiPath}/user/update`,
+        method: 'put',
+        handler: async (req, res) => {
+            const { userId, updatedFields } = req.body;
+
+            if (!userId || !updatedFields) {
+                return res.status(400).json({ error: 'User ID and updated fields are required' });
+            }
+
+            try {
+                await updateUser(userId, updatedFields);
+                return res.status(200).json({ message: 'User updated successfully' });
+            } catch (error) {
+                return res.status(500).json({ error: 'An error occurred during user update' });
+            }
         }
     },
 
