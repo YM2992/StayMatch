@@ -69,7 +69,25 @@ const routes = [
         path: `${apiPath}/hotels`,
         method: 'get',
         handler: async (req, res) => {
-            
+            const { branch_name, address, price, room_count, bed_count, amenities } = req.query;
+
+            try {
+                // Build a filter object based on provided query parameters
+                const filters = {};
+                if (branch_name) filters.branch_name = branch_name;
+                if (address) filters.address = address;
+                if (price) filters.price = price;
+                if (room_count) filters.room_count = room_count;
+                if (bed_count) filters.bed_count = bed_count;
+                if (amenities) filters.amenities = amenities;
+
+                // Replace with actual logic to fetch hotels based on filters
+                const hotels = await fetchHotels(filters);
+
+                return res.status(200).json({ hotels });
+            } catch (error) {
+                return res.status(500).json({ error: 'An error occurred while fetching hotels' });
+            }
         }
     }
 ];
