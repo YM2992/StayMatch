@@ -1,59 +1,62 @@
-import { useState } from "react";
-
-const Home = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Email:", email);
-    console.log("Password:", password);
-    // Add your login logic here
-  };
+function Home() {
+  const handleSubmit = async () => {};
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-[#FDFCFB]">
-      <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-sm">
-        <h2 className="text-3xl font-bold mb-6 text-center text-[#2C3E50]">
-          Welcome Back
-        </h2>
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div>
-            <label className="block text-sm font-medium text-[#2C3E50]">
-              Email
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#E67E22]"
+    <div className="flex justify-center items-center h-screen w-full bg-gradient-to-b from-[#e1edf8] to-[#85d2f8]">
+      <div className="bg-white p-8 rounded-xl shadow-md w-96 relative">
+        <div className="flex flex-col items-center">
+          <div className="absolute -top-32 w-32 h-32 bg-gray-300 rounded-full flex justify-center items-center">
+            <img
+              src="/assets/IoTBay_Logo.png"
+              alt="IoTBay"
+              className="w-[95%] h-[95%] rounded-full object-cover filter brightness-0 -translate-y-1"
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-[#2C3E50]">
-              Password
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#E67E22]"
-            />
-          </div>
+          <h2 className="text-2xl font-semibold text-black mt-20">Welcome!</h2>
+          <p className="text-sm text-gray-700 mt-4 mb-8 text-center">
+            Please sign in to your account below
+          </p>
+        </div>
 
-          <button
-            type="submit"
-            className="w-full bg-[#E67E22] text-white py-2 font-semibold rounded-xl hover:bg-[#cf6a1c] transition duration-300"
-          >
-            Sign In
-          </button>
-        </form>
+        <div className="flex flex-col gap-2 w-[17rem] mx-auto">
+          <Input
+            type="email"
+            field="Email"
+            value={email}
+            func={setEmail}
+            required
+          />
+          <Input
+            type="password"
+            field="Password"
+            value={password}
+            func={setPassword}
+          />
+        </div>
+
+        <div className="flex justify-center mt-4">
+          <a href="#" className="text-sm text-blue-900">
+            Forgot Password?
+          </a>
+        </div>
+
+        <button
+          onClick={handleSubmit}
+          className="w-40 h-10 bg-[#7bc3ff] text-white rounded-full flex justify-center items-center mx-auto mt-4 mb-4 hover:bg-blue-600 hover:scale-110 transition-transform duration-300"
+        >
+          Sign in
+        </button>
+
+        <p className="text-center text-sm text-gray-700">
+          Having problems?{" "}
+          <a href="contact-us" className="text-blue-900">
+            Contact us
+          </a>
+        </p>
       </div>
     </div>
   );
-};
+}
 
 export default Home;
