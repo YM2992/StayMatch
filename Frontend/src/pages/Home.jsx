@@ -1,14 +1,20 @@
+import Input from "../components/Input";
+import { useState } from "react";
+
 function Home() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
   const handleSubmit = async () => {};
 
   return (
     <div className="flex justify-center items-center h-screen w-full bg-gradient-to-b from-[#e1edf8] to-[#85d2f8]">
-      <div className="bg-white p-8 rounded-xl shadow-md w-96 relative">
+      <div className="bg-white p-8 rounded-xl shadow-md w-full max-w-sm relative">
         <div className="flex flex-col items-center">
-          <div className="absolute -top-32 w-32 h-32 bg-gray-300 rounded-full flex justify-center items-center">
+          <div className="absolute -top-16 w-32 h-32 bg-gray-300 rounded-full flex justify-center items-center">
             <img
-              src="/assets/IoTBay_Logo.png"
-              alt="IoTBay"
+              src="/assets/StayMatch_Logo.png"
+              alt="StayMatch"
               className="w-[95%] h-[95%] rounded-full object-cover filter brightness-0 -translate-y-1"
             />
           </div>
@@ -19,7 +25,7 @@ function Home() {
           </p>
         </div>
 
-        <div className="flex flex-col gap-2 w-[17rem] mx-auto">
+        <div className="flex flex-col gap-2 w-[17rem] mx-auto justify-items-center ">
           <Input
             type="email"
             field="Email"

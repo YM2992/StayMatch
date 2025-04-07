@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+
 function Input({ field, func, value, type = "text" }) {
   const [show, setShow] = useState(type !== "password");
   const isPassword = type === "password";
@@ -11,7 +12,7 @@ function Input({ field, func, value, type = "text" }) {
         value={value}
         placeholder={field}
         type={isPassword ? (show ? "text" : "password") : value}
-        className="input-field"
+        className="px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-200"
         onChange={(e) => func(e.target.value)}
         required
       ></input>
