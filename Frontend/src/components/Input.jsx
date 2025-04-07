@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 
-function Input({ field, func, value, type = "text" }) {
+function Input({ field, func, value, type = "text", className = "" }) {
   const [show, setShow] = useState(type !== "password");
   const isPassword = type === "password";
 
