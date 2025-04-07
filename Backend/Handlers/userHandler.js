@@ -1,7 +1,8 @@
 const { executeQuery } = require('../Modules/Azure');
+let userHandler = {};
 
 // Authenticate user
-async function authenticateUser(email, password) {
+userHandler.authenticateUser = async function(email, password) {
     const query = `
         SELECT * 
         FROM User 
@@ -22,7 +23,7 @@ async function authenticateUser(email, password) {
 }
 
 // Register new user
-async function registerUser(user) {
+userHandler.registerUser = async function(user) {
     console.log('Registering user:', user);
     
     const { email, password, first_name, last_name } = user;
@@ -49,7 +50,7 @@ async function registerUser(user) {
 }
 
 // Update user
-async function updateUser(User_ID, updatedFields) {
+userHandler.updateUser = async function(User_ID, updatedFields) {
     const { email, password, first_name, last_name } = updatedFields;
     const updates = [];
     const params = [{ name: 'User_ID', type: 'Int', value: User_ID }];
@@ -86,8 +87,4 @@ async function updateUser(User_ID, updatedFields) {
     }
 }
 
-module.exports = {
-    authenticateUser,
-    registerUser,
-    updateUser
-};
+module.exports = userHandler;
