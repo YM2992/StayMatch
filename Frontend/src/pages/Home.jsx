@@ -25,7 +25,7 @@ function Home() {
           </p>
         </div>
 
-        <div className="flex flex-col gap-2 w-[17rem] mx-auto justify-items-center ">
+        <div className="flex flex-col w-[17rem] mx-auto justify-items-center ">
           <Input
             type="email"
             field="Email"

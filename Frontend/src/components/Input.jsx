@@ -12,7 +12,7 @@ function Input({ field, func, value, type = "text" }) {
         value={value}
         placeholder={field}
         type={isPassword ? (show ? "text" : "password") : value}
-        className="px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-200"
+        className="px-12  rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-200"
         onChange={(e) => func(e.target.value)}
         required
       ></input>
