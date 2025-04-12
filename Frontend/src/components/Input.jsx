@@ -2,34 +2,31 @@ import { useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 function Input({ field, func, value, type = "text" }) {
-  const [show, setShow] = useState(type !== "password");
+  const [show, setShow] = useState(false);
   const isPassword = type === "password";
 
+  const inputType = isPassword ? (show ? "text" : "password") : type;
+
   return (
-    <div style={{ display: "flex", position: "relative" }}>
+    <div className="flex items-center border border-gray-300 rounded-lg px-4 mb-4 bg-white">
       <input
-        style={{ marginBottom: "1rem" }}
         value={value}
         placeholder={field}
-        type={isPassword ? (show ? "text" : "password") : value}
-        className="px-12  rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-200"
+        type={inputType}
+        className="w-full py-2 focus:outline-none text-black"
         onChange={(e) => func(e.target.value)}
         required
-      ></input>
+      />
       {isPassword && (
-        <p
+        <span
           onClick={() => setShow(!show)}
-          style={{
-            position: "absolute",
-            right: "10px",
-            lineHeight: "2.3rem",
-            margin: "auto",
-          }}
+          className="cursor-pointer text-gray-600"
         >
           {show ? <FaEyeSlash /> : <FaEye />}
-        </p>
+        </span>
       )}
     </div>
   );
 }
+
 export default Input;
