@@ -1,6 +1,7 @@
 import Input from "../components/Input";
 import { useState } from "react";
 import logo from "../assets/logo.png";
+
 function Home() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -19,7 +20,6 @@ function Home() {
       setEmailError("");
     }
 
-    // Password length check
     if (password.length < 6) {
       setPasswordError("Password must be at least 6 characters.");
       isValid = false;
