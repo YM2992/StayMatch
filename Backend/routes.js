@@ -1,4 +1,5 @@
-import { authenticateUser, registerUser, updateUser } from './Handlers/userHandler.js';
+// import { authenticateUser, registerUser, updateUser } from './Handlers/userHandler.js';
+import userHandler from './Handlers/userHandler.js';
 
 const apiPath = '/api';
 const routes = [
