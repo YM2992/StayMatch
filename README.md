@@ -14,10 +14,10 @@ npm install .
 ## Running
 ### Frontend
 ```
-npm start frontend
+npm run frontend
 ```
 
 ### Backend
 ```
-npm start backend
+npm run backend
 ```
