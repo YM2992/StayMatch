@@ -1,5 +1,5 @@
-// import { authenticateUser, registerUser, updateUser } from './Handlers/userHandler.js';
 import userHandler from './Handlers/userHandler.js';
+import hotelHandler from './Handlers/hotelHandler.js';
 
 const apiPath = '/api';
 const routes = [
@@ -83,7 +83,7 @@ const routes = [
                 if (amenities) filters.amenities = amenities;
 
                 // Replace with actual logic to fetch hotels based on filters
-                const hotels = await fetchHotels(filters);
+                const hotels = await getHotels(filters);
 
                 return res.status(200).json({ hotels });
             } catch (error) {
