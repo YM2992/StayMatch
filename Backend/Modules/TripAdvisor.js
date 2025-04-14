@@ -22,7 +22,6 @@ class TripAdvisorAPI {
                     currency: currency
                 }
             });
-            console.log('LocationDetails:', response.data);
             return response.data;
         } catch (error) {
             console.error('Error fetching place details:', error.message);
@@ -66,7 +65,6 @@ class TripAdvisorAPI {
                     language: language
                 },
             });
-            console.log('Locations:', response.data);
             return response.data;
         } catch (error) {
             console.error('Error searching places:', error.message);
