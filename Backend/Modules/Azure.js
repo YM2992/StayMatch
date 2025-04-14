@@ -1,5 +1,8 @@
 const sql = require('mssql');
+const { BlobServiceClient, BlobClient } = require("@azure/storage-blob");
+const { v1: uuidv1 } = require("uuid");
 
+// Azure Environment Variables
 const sqlConfig = {
     user: process.env.SQL_USER,
     password: process.env.SQL_PASSWORD,
@@ -12,10 +15,28 @@ const sqlConfig = {
         encrypt: true
     }
 };
+const blobConfig = {
+    containerName: process.env.BLOB_CONTAINER_NAME,
+    connectionString: process.env.BLOB_CONNECTION_STRING
+};
 
-pool = null;
+// Validate environment variables
+if (!sqlConfig.user || !sqlConfig.password || !sqlConfig.server || !sqlConfig.database) {
+    throw new Error('Missing required SQL configuration environment variables.');
+}
+if (!blobConfig.containerName || !blobConfig.connectionString) {
+    throw new Error('Missing required Blob configuration environment variables.');
+}
 
-async function connectToSQL() {
+
+// Azure wrapper start
+let Azure = {}
+
+let pool = null;
+let blobServiceClient = null;
+
+// SQL Table Storage
+Azure.connectToSQL = async function () {
     try {
         pool = await sql.connect(sqlConfig);
         console.log('Connected to Azure SQL Database');
@@ -25,7 +46,7 @@ async function connectToSQL() {
     }
 }
 
-async function getFromTable(tableName, columns = '*', whereClause = '') {
+Azure.getFromTable = async function (tableName, columns = '*', whereClause = '') {
     try {
         const query = `SELECT ${columns} FROM ${tableName} ${whereClause}`;
         const result = await executeQuery(query);
@@ -36,7 +57,7 @@ async function getFromTable(tableName, columns = '*', whereClause = '') {
     }
 }
 
-async function insertIntoTable(tableName, columns, values) {
+Azure.insertIntoTable = async function (tableName, columns, values) {
     try {
         const query = `INSERT INTO ${tableName} (${columns}) VALUES (${values})`;
         const result = await executeQuery(query);
@@ -47,7 +68,7 @@ async function insertIntoTable(tableName, columns, values) {
     }
 }
 
-async function executeQuery(query, params = []) {
+Azure.executeQuery = async function (query, params = []) {
     try {
         const request = pool.request();
         params.forEach(param => request.input(param.name, param.value));
@@ -59,33 +80,71 @@ async function executeQuery(query, params = []) {
     }
 }
 
-async function uploadBlob(blobName, content) {
+
+// Blob Storage
+Azure.connectToBlob = async function () {
     try {
-        const containerClient = blobServiceClient.getContainerClient(containerName);
+        blobServiceClient = BlobServiceClient.fromConnectionString(blobConfig.connectionString);
+    } catch (error) {
+        console.error('Error connecting to Azure Blob Storage:', error);
+        throw error;
+    }
+}
+
+
+Azure.uploadBlobFile = async function (blobName, filePath) {
+    try {
+        const containerClient = blobServiceClient.getContainerClient(blobConfig.containerName);
+        const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+        await blockBlobClient.uploadFile(filePath);
+        console.log(`Blob "${blobName}" uploaded successfully.`);
+    } catch (error) {
+        throw error;
+    }
+}
+
+Azure.uploadBlob = async function (blobName, content) {
+    try {
+        const containerClient = blobServiceClient.getContainerClient(blobConfig.containerName);
         const blockBlobClient = containerClient.getBlockBlobClient(blobName);
         await blockBlobClient.upload(content, Buffer.byteLength(content));
         console.log(`Blob "${blobName}" uploaded successfully.`);
     } catch (error) {
-        console.error('Error uploading blob:', error);
         throw error;
     }
 }
 
-async function downloadBlob(blobName) {
+Azure.downloadBlob = async function (blobName) {
     try {
-        const containerClient = blobServiceClient.getContainerClient(containerName);
+        const containerClient = blobServiceClient.getContainerClient(blobConfig.containerName);
         const blockBlobClient = containerClient.getBlockBlobClient(blobName);
         const downloadResponse = await blockBlobClient.download(0);
-        const downloadedContent = await streamToString(downloadResponse.readableStreamBody);
+        const downloadedContent = await Azure.streamToString(downloadResponse.readableStreamBody);
         console.log(`Blob "${blobName}" downloaded successfully.`);
         return downloadedContent;
     } catch (error) {
-        console.error('Error downloading blob:', error);
         throw error;
     }
 }
 
-async function streamToString(readableStream) {
+Azure.listBlobs = async function () {
+    try {
+        console.log('Listing blobs in container:', blobConfig.containerName);
+        const containerClient = blobServiceClient.getContainerClient(blobConfig.containerName);
+        const blobs = [];
+        for await (const blob of containerClient.listBlobsFlat()) {
+            const tempBlockBlobClient = containerClient.getBlockBlobClient(blob.name);
+            blobs.push({
+                Name: blob.name, URL: tempBlockBlobClient.url
+            });
+        }
+        return blobs;
+    } catch (error) {
+        throw error;
+    }
+}
+
+Azure.streamToString = async function (readableStream) {
     return new Promise((resolve, reject) => {
         const chunks = [];
         readableStream.on('data', chunk => chunks.push(chunk.toString()));
@@ -94,12 +153,4 @@ async function streamToString(readableStream) {
     });
 }
 
-module.exports = {
-    connectToSQL,
-    getFromTable,
-    insertIntoTable,
-    executeQuery,
-    uploadBlob,
-    downloadBlob,
-    streamToString
-};
+module.exports = Azure;
