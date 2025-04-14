@@ -6,7 +6,6 @@ console.log(`Server starting: ${currentTime}`);
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const fs = require('fs');
 
 const app = express();
 app.use(cors({ origin: '*' }));
@@ -18,6 +17,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // import local modules
 const TripAdvisorAPI = require('./Modules/TripAdvisor');
 const Azure = require('./Modules/Azure');
+const Util = require('./Modules/Util');
 
 // initialising API modules
 const TripAdvisor = new TripAdvisorAPI(process.env.TRIPADVISOR_API_KEY);
@@ -58,8 +58,28 @@ app.listen(PORT, () => {
 // });
 
 /* TripAdvisor API usage example */
-// TripAdvisor.searchLocation("Jeddah").then(data => {
-//     TripAdvisor.getLocationDetails(data.data[0].location_id);
+// TripAdvisor.searchLocation("Jeddah").then(async data => {
+//     const locationDetails = await TripAdvisor.getLocationDetails(data.data[0].location_id);
+    
+//     await Util.jsonToCsvFile(locationDetails, 'data/tripadvisor.csv', {
+//         header: true,
+//         delimiter: ',',
+//         quote: '"',
+//         eol: '\n',
+//         columns: [
+//             'location_id',
+//             'name',
+//             'address_obj.street1',
+//             'address_obj.street2',
+//             'address_obj.city',
+//             'address_obj.state',
+//             'address_obj.country'
+//         ]
+//     }).then(() => {
+//         console.log('CSV file created successfully');
+//     }).catch(err => {
+//         console.error('Error creating CSV file:', err);
+//     });
 // });
 
 /* Azure API usage example */
