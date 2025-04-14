@@ -48,7 +48,9 @@ function Home() {
             />
           </div>
 
-          <h2 className="text-2xl font-semibold text-black mt-20">Welcome!</h2>
+          <h2 className="text-2xl font-semibold text-black mt-20">
+            Welcome Back!
+          </h2>
           <p className="text-sm text-gray-700 mt-4 mb-8 text-center">
             Please sign in to your account below
           </p>
@@ -74,6 +76,12 @@ function Home() {
         <div className="flex justify-center mt-2">
           <a href="#" className="text-sm text-blue-900">
             Forgot Password?
+          </a>
+        </div>
+
+        <div className="flex justify-center mt-2">
+          <a href="registration" className="text-sm text-blue-900">
+            New User?
           </a>
         </div>
 
