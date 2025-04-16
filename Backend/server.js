@@ -18,6 +18,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 const TripAdvisorAPI = require('./Modules/TripAdvisor');
 const Azure = require('./Modules/Azure');
 const Util = require('./Modules/Util');
+const downloadKaggleData = require('./Modules/fetchKaggleData');
 
 // initialising API modules
 const TripAdvisor = new TripAdvisorAPI(process.env.TRIPADVISOR_API_KEY);
@@ -37,8 +38,51 @@ app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
 
-/* Azure Blob Example */
-Azure.connectToBlob().then(() => {
+
+// Create directories if they don't exist
+const uploadDir = 'Backend/data';
+const downloadDir = 'Backend/blobDataFiles';
+
+if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+    console.log(`Created directory: ${uploadDir}`);
+} else {
+    console.log(`Directory already exists: ${uploadDir}`);
+}
+if (!fs.existsSync(downloadDir)) {
+    fs.mkdirSync(downloadDir, { recursive: true });
+    console.log(`Created directory: ${downloadDir}`);
+} else {
+    console.log(`Directory already exists: ${downloadDir}`);
+}
+
+
+async function main() {
+    // Connect to Azure SQL and Blob Storage
+    await Azure.connectToSQL();
+    await Azure.connectToBlob();
+
+    // Download Kaggle dataset and TripAdvisor data to Backend/data
+    downloadKaggleData();
+    await TripAdvisor.downloadTripAdvisorData(uploadDir);
+    
+    // Upload all Backend/data files to Azure Blob Storage
+    fs.readdir(uploadDir, (err, files) => {
+        if (err) {
+            console.error('Error reading directory:', err);
+            return;
+        }
+        files.forEach(file => {
+            const filePath = `${uploadDir}/${file}`;
+            Azure.uploadBlobFile(file, filePath).then(() => {
+                console.log(`File ${file} uploaded successfully`);
+            }).catch(err => {
+                console.error(`Error uploading file ${file}:`, err);
+            });
+        });
+    });
+    
+    // Download all blobs from Azure Blob Storage to Backend/blobDataFiles
     Azure.listBlobs().then(blobs => {
         blobs.forEach(blob => {
             Azure.fetchBlob(blob.Name).then(content => {
@@ -56,19 +100,18 @@ Azure.connectToBlob().then(() => {
     }).catch(err => {
         console.error('Error listing blobs:', err);
     });
+    
+    // Refine the data
+    
+    
+    // Load the data to the SQL database
+}
 
-    // Azure.uploadBlobFile('output.csv', 'data/output.csv').then(() => {
-    //     console.log('Blob uploaded successfully');
-    // }).catch(err => {
-    //     console.error('Error uploading blob:', err);
-    // });
-
-    // Azure.downloadBlob('output.csv').then(content => {
-    //     console.log('Blob downloaded successfully:', content);
-    // }).catch(err => {
-    //     console.error('Error downloading blob:', err);
-    // });
+main().catch(err => {
+    console.error('Error in main function:', err);
 });
+
+
 
 /* TripAdvisor API usage example */
 // TripAdvisor.searchLocation("Jeddah").then(async data => {
