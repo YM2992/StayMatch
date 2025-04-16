@@ -114,7 +114,7 @@ Azure.uploadBlob = async function (blobName, content) {
     }
 }
 
-Azure.downloadBlob = async function (blobName) {
+Azure.fetchBlob = async function (blobName) {
     try {
         const containerClient = blobServiceClient.getContainerClient(blobConfig.containerName);
         const blockBlobClient = containerClient.getBlockBlobClient(blobName);
