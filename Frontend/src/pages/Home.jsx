@@ -1,6 +1,7 @@
 import Input from "../components/Input";
 import { useState } from "react";
 import logo from "../assets/logo.png";
+import { Link } from "react-router-dom";
 
 function Home() {
   const [email, setEmail] = useState("");
@@ -74,15 +75,15 @@ function Home() {
         </div>
 
         <div className="flex justify-center mt-2">
-          <a href="#" className="text-sm text-blue-900">
+          <Link to="forgot-password" className="text-sm text-blue-900">
             Forgot Password?
-          </a>
+          </Link>
         </div>
 
         <div className="flex justify-center mt-2">
-          <a href="registration" className="text-sm text-blue-900">
+          <Link to="/registration" className="text-sm text-blue-900">
             New User?
-          </a>
+          </Link>
         </div>
 
         <button

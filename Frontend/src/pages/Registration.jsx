@@ -1,6 +1,7 @@
 import Input from "../components/Input";
 import { useState } from "react";
 import logo from "../assets/logo.png";
+import { Link } from "react-router-dom";
 
 function Registration() {
   const [email, setEmail] = useState("");
@@ -110,9 +111,9 @@ function Registration() {
         </div>
 
         <div className="flex justify-center mt-2">
-          <a href="home" className="text-sm text-blue-900">
+          <Link to="/home" className="text-sm text-blue-900">
             Existing User?
-          </a>
+          </Link>
         </div>
 
         <button
