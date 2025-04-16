@@ -114,13 +114,25 @@ Azure.uploadBlob = async function (blobName, content) {
     }
 }
 
+Azure.downloadBlob = async function (blobName) {
+    try {
+        const containerClient = blobServiceClient.getContainerClient(blobConfig.containerName);
+        const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+        const downloadResponse = await blockBlobClient.download(0);
+        console.log(`Blob "${blobName}" downloaded successfully.`);
+        return downloadedContent;
+    } catch (error) {
+        throw error;
+    }
+}
+
 Azure.fetchBlob = async function (blobName) {
     try {
         const containerClient = blobServiceClient.getContainerClient(blobConfig.containerName);
         const blockBlobClient = containerClient.getBlockBlobClient(blobName);
         const downloadResponse = await blockBlobClient.download(0);
         const downloadedContent = await Azure.streamToString(downloadResponse.readableStreamBody);
-        console.log(`Blob "${blobName}" downloaded successfully.`);
+        console.log(`Blob "${blobName}" fetched successfully.`);
         return downloadedContent;
     } catch (error) {
         throw error;

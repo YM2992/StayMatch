@@ -25,6 +25,7 @@ const TripAdvisor = new TripAdvisorAPI(process.env.TRIPADVISOR_API_KEY);
 
 // API server
 const routes = require('./routes').default;
+const fs = require('fs');
 
 routes.forEach(route => {
     app[route.method.toLowerCase()](route.path, route.handler);
@@ -40,9 +41,15 @@ app.listen(PORT, () => {
 Azure.connectToBlob().then(() => {
     Azure.listBlobs().then(blobs => {
         blobs.forEach(blob => {
-            console.log(`Blob name: ${blob.name}`);
-            Azure.fetchBlob(blob.Name).then(content => {
-                console.log(`EXCEL DATA: ${content}`);
+            Azure.downloadBlob(blob.Name).then(file => {
+                const path = `blobDataFiles/${blob.name}`;
+                fs.writeFile(path, file, (err) => {
+                    if (err) {
+                        console.error(`Error saving file ${blob.name} locally:`, err);
+                    } else {
+                        console.log(`File ${blob.name} saved locally to ${path} successfully`);
+                    }
+                });
             });
         });
         console.log('List of blobs:', blobs);
