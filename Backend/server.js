@@ -37,12 +37,18 @@ app.listen(PORT, () => {
 });
 
 /* Azure Blob Example */
-// Azure.connectToBlob().then(() => {
-//     Azure.listBlobs().then(blobs => {
-//         console.log('List of blobs:', blobs);
-//     }).catch(err => {
-//         console.error('Error listing blobs:', err);
-//     });
+Azure.connectToBlob().then(() => {
+    Azure.listBlobs().then(blobs => {
+        blobs.forEach(blob => {
+            console.log(`Blob name: ${blob.name}`);
+            Azure.fetchBlob(blob.Name).then(content => {
+                console.log(`EXCEL DATA: ${content}`);
+            });
+        });
+        console.log('List of blobs:', blobs);
+    }).catch(err => {
+        console.error('Error listing blobs:', err);
+    });
 
     // Azure.uploadBlobFile('output.csv', 'data/output.csv').then(() => {
     //     console.log('Blob uploaded successfully');
@@ -55,7 +61,7 @@ app.listen(PORT, () => {
     // }).catch(err => {
     //     console.error('Error downloading blob:', err);
     // });
-// });
+});
 
 /* TripAdvisor API usage example */
 // TripAdvisor.searchLocation("Jeddah").then(async data => {
