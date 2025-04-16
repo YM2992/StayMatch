@@ -37,25 +37,25 @@ app.listen(PORT, () => {
 });
 
 /* Azure Blob Example */
-// Azure.connectToBlob().then(() => {
-//     Azure.listBlobs().then(blobs => {
-//         console.log('List of blobs:', blobs);
-//     }).catch(err => {
-//         console.error('Error listing blobs:', err);
-//     });
+Azure.connectToBlob().then(() => {
+    Azure.listBlobs().then(blobs => {
+        console.log('List of blobs:', blobs);
+    }).catch(err => {
+        console.error('Error listing blobs:', err);
+    });
 
-    // Azure.uploadBlobFile('output.csv', 'data/output.csv').then(() => {
-    //     console.log('Blob uploaded successfully');
-    // }).catch(err => {
-    //     console.error('Error uploading blob:', err);
-    // });
+    Azure.uploadBlobFile('output.csv', 'data/output.csv').then(() => {
+        console.log('Blob uploaded successfully');
+    }).catch(err => {
+        console.error('Error uploading blob:', err);
+    });
 
-    // Azure.downloadBlob('output.csv').then(content => {
-    //     console.log('Blob downloaded successfully:', content);
-    // }).catch(err => {
-    //     console.error('Error downloading blob:', err);
-    // });
-// });
+    Azure.downloadBlob('output.csv').then(content => {
+        console.log('Blob downloaded successfully:', content);
+    }).catch(err => {
+        console.error('Error downloading blob:', err);
+    });
+});
 
 /* TripAdvisor API usage example */
 // TripAdvisor.searchLocation("Jeddah").then(async data => {
