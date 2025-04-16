@@ -1,4 +1,5 @@
 const axios = require('axios');
+const Util = require('./Util');
 
 class TripAdvisorAPI {
     constructor(apiKey) {
@@ -69,6 +70,38 @@ class TripAdvisorAPI {
         } catch (error) {
             console.error('Error searching places:', error.message);
             throw error;
+        }
+    }
+
+    async downloadTripAdvisorData(uploadDir) {
+        try {
+            const searchResults = await this.searchLocation("Jeddah");
+            if (searchResults.data && searchResults.data.length > 0) {
+            const locationDetails = await this.getLocationDetails(searchResults.data[0].location_id);
+
+            const csvOptions = {
+                header: true,
+                delimiter: ',',
+                quote: '"',
+                eol: '\n',
+                columns: [
+                'location_id',
+                'name',
+                'address_obj.street1',
+                'address_obj.street2',
+                'address_obj.city',
+                'address_obj.state',
+                'address_obj.country'
+                ]
+            };
+
+            await Util.jsonToCsvFile(locationDetails, `${uploadDir}/tripAdvisor.csv`, csvOptions);
+            console.log('CSV file created successfully');
+            } else {
+            console.log('No search results found for the given query.');
+            }
+        } catch (error) {
+            console.error('Error downloading TripAdvisor data:', error.message);
         }
     }
 }
