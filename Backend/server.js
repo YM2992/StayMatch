@@ -67,35 +67,42 @@ async function main() {
     await TripAdvisor.downloadTripAdvisorData(uploadDir);
     
     // Upload all Backend/data files to Azure Blob Storage
-    fs.readdir(uploadDir, (err, files) => {
-        if (err) {
-            console.error('Error reading directory:', err);
-            return;
-        }
-        files.forEach(file => {
-            const filePath = `${uploadDir}/${file}`;
-            Azure.uploadBlobFile(file, filePath).then(() => {
-                console.log(`File ${file} uploaded successfully`);
-            }).catch(err => {
-                console.error(`Error uploading file ${file}:`, err);
+    await new Promise((resolve, reject) => {
+        fs.readdir(uploadDir, (err, files) => {
+            if (err) {
+                console.error('Error reading directory:', err);
+                reject(err);
+                return;
+            }
+            const uploadPromises = files.map(file => {
+                const filePath = `${uploadDir}/${file}`;
+                return Azure.uploadBlobFile(file, filePath)
+                    .then(() => {
+                        console.log(`File ${file} uploaded successfully`);
+                    })
+                    .catch(err => {
+                        console.error(`Error uploading file ${file}:`, err);
+                        throw err;
+                    });
             });
+            Promise.all(uploadPromises)
+                .then(() => resolve())
+                .catch(reject);
         });
     });
     
     // Download all blobs from Azure Blob Storage to Backend/blobDataFiles
-    Azure.listBlobs().then(blobs => {
-        blobs.forEach(blob => {
-            Azure.fetchBlob(blob.Name).then(content => {
+    await Azure.listBlobs().then(async blobs => {
+        for (const blob of blobs) {
+            try {
+                const content = await Azure.fetchBlob(blob.Name);
                 const filePath = `Backend/blobDataFiles/${blob.Name}`;
-                fs.writeFile(filePath, content, (err) => {
-                    if (err) {
-                        console.error(`Error saving blob ${blob.Name} to file:`, err);
-                    } else {
-                        console.log(`Blob ${blob.Name} saved to file: ${filePath}`);
-                    }
-                });
-            });
-        });
+                await fs.promises.writeFile(filePath, content);
+                console.log(`Blob ${blob.Name} saved to file: ${filePath}`);
+            } catch (err) {
+                console.error(`Error processing blob ${blob.Name}:`, err);
+            }
+        }
         console.log('List of blobs:', blobs);
     }).catch(err => {
         console.error('Error listing blobs:', err);
