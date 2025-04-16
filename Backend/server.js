@@ -41,13 +41,13 @@ app.listen(PORT, () => {
 Azure.connectToBlob().then(() => {
     Azure.listBlobs().then(blobs => {
         blobs.forEach(blob => {
-            Azure.downloadBlob(blob.Name).then(file => {
-                const path = `blobDataFiles/${blob.name}`;
-                fs.writeFile(path, file, (err) => {
+            Azure.fetchBlob(blob.Name).then(content => {
+                const filePath = `Backend/blobDataFiles/${blob.Name}`;
+                fs.writeFile(filePath, content, (err) => {
                     if (err) {
-                        console.error(`Error saving file ${blob.name} locally:`, err);
+                        console.error(`Error saving blob ${blob.Name} to file:`, err);
                     } else {
-                        console.log(`File ${blob.name} saved locally to ${path} successfully`);
+                        console.log(`Blob ${blob.Name} saved to file: ${filePath}`);
                     }
                 });
             });

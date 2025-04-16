@@ -120,7 +120,7 @@ Azure.downloadBlob = async function (blobName) {
         const blockBlobClient = containerClient.getBlockBlobClient(blobName);
         const downloadResponse = await blockBlobClient.download(0);
         console.log(`Blob "${blobName}" downloaded successfully.`);
-        return downloadedContent;
+        return downloadResponse;
     } catch (error) {
         throw error;
     }
