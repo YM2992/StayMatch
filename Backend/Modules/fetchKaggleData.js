@@ -7,7 +7,7 @@ const kaggleDataset = 'asafarji/saudi-arabia-bookingcom-2021'; // e.g. 'username
 const datasetFile = 'winemag-data_first150k.csv'; // file inside the dataset
 
 const downloadKaggleData = () => {
-    const command = `kaggle datasets download -d ${kaggleDataset} -p ./data --unzip --force`;
+    const command = `kaggle datasets download -d ${kaggleDataset} -p ./Backend/data --unzip --force`;
     exec(command, (error, stdout, stderr) => {
         if (error) {
             console.error(`❌ Error downloading dataset: ${error.message}`);
@@ -29,9 +29,4 @@ const downloadKaggleData = () => {
     });
 };
 
-// Make sure data dir exists
-if (!fs.existsSync('./data')) {
-    fs.mkdirSync('./data');
-}
-
-downloadKaggleData();
+module.exports = downloadKaggleData;
