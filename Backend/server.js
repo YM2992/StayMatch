@@ -96,7 +96,7 @@ async function main() {
         for (const blob of blobs) {
             try {
                 const content = await Azure.fetchBlob(blob.Name);
-                const filePath = `Backend/blobDataFiles/${blob.Name}`;
+                const filePath = `Backend/blobDataFiles/blob_${blob.Name}`;
                 await fs.promises.writeFile(filePath, content);
                 console.log(`Blob ${blob.Name} saved to file: ${filePath}`);
             } catch (err) {
