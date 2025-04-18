@@ -1,21 +1,20 @@
 const fs = require('fs');
-const path = require('path');
 const axios = require('axios');
 const csvParser = require('csv-parser');
 const { parse } = require('json2csv');
-
-const inputDir = path.join(__dirname, 'blobDataFiles');
-const outputDir = path.join(__dirname, 'RefinedDataFiles');
-
-// Ensure output directory exists
-if (!fs.existsSync(outputDir)) {
-    fs.mkdirSync(outputDir, { recursive: true });
-}
+const path = require('path');
 
 const englishRegex = /^[\x00-\x7F]+$/;
 
-// Async wrapper so we can await inside .on('data')
+// ✅ Async wrapper so we can await inside .on('data')
 async function refineFile(inputPath, outputPath, fileName) {
+    const outputDir = path.dirname(outputPath);
+
+    // Ensure output directory exists
+    if (!fs.existsSync(outputDir)) {
+        fs.mkdirSync(outputDir, { recursive: true });
+    }
+
     const results = [];
 
     return new Promise((resolve, reject) => {
@@ -25,14 +24,13 @@ async function refineFile(inputPath, outputPath, fileName) {
                 let name = row.name?.trim();
                 if (!name) return;
 
-                // Translate if not English
                 if (!englishRegex.test(name)) {
                     try {
                         const res = await axios.post('https://libretranslate.de/translate', {
                             q: name,
                             source: 'auto',
                             target: 'en',
-                            format: 'text'
+                            format: 'text',
                         });
                         name = res.data.translatedText;
                         console.log(`🌐 Translated: "${row.name}" → "${name}"`);
@@ -70,16 +68,4 @@ async function refineFile(inputPath, outputPath, fileName) {
     });
 }
 
-(async () => {
-    try {
-        const files = fs.readdirSync(inputDir).filter(file => file.endsWith('.csv'));
-
-        for (const file of files) {
-            const inputPath = path.join(inputDir, file);
-            const outputPath = path.join(outputDir, `refined_${file}`);
-            await refineFile(inputPath, outputPath, file);
-        }
-    } catch (err) {
-        console.error('🔥 Error refining CSVs:', err);
-    }
-})();
+module.exports = refineFile;
