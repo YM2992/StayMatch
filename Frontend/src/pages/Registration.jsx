@@ -3,12 +3,18 @@ import { useState } from "react";
 import logo from "../assets/logo.png";
 import { Link } from "react-router-dom";
 
-function Home() {
+function Registration() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
+
+  const [name, setName] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  const [nameError, setNameError] = useState("");
+  const [confirmPasswordError, setConfirmPasswordError] = useState("");
 
   const validate = () => {
     let isValid = true;
@@ -19,6 +25,20 @@ function Home() {
       isValid = false;
     } else {
       setEmailError("");
+    }
+
+    if (!name.trim()) {
+      setNameError("Please enter your name.");
+      isValid = false;
+    } else {
+      setNameError("");
+    }
+
+    if (password !== confirmPassword) {
+      setConfirmPasswordError("Passwords do not match.");
+      isValid = false;
+    } else {
+      setConfirmPasswordError("");
     }
 
     if (password.length < 6) {
@@ -50,19 +70,23 @@ function Home() {
           </div>
 
           <h2 className="text-2xl font-semibold text-black mt-20">
-            Welcome Back!
+            Welcome to StayMatch!
           </h2>
           <p className="text-sm text-gray-700 mt-4 mb-8 text-center">
-            Please sign in to your account below
+            Become a Member — It’s Free!
           </p>
         </div>
 
         <div className="flex flex-col w-[17rem] mx-auto justify-items-center">
+          <Input type="text" field="Name" value={name} func={setName} />
+          {nameError && (
+            <p className="text-red-600 text-sm -mt-3 mb-2">{nameError}</p>
+          )}
+
           <Input type="email" field="Email" value={email} func={setEmail} />
           {emailError && (
             <p className="text-red-600 text-sm -mt-3 mb-2">{emailError}</p>
           )}
-
           <Input
             type="password"
             field="Password"
@@ -72,17 +96,23 @@ function Home() {
           {passwordError && (
             <p className="text-red-600 text-sm -mt-3 mb-2">{passwordError}</p>
           )}
+
+          <Input
+            type="password"
+            field="Confirm Password"
+            value={confirmPassword}
+            func={setConfirmPassword}
+          />
+          {confirmPasswordError && (
+            <p className="text-red-600 text-sm -mt-3 mb-2">
+              {confirmPasswordError}
+            </p>
+          )}
         </div>
 
         <div className="flex justify-center mt-2">
-          <Link to="forgot-password" className="text-sm text-blue-900">
-            Forgot Password?
-          </Link>
-        </div>
-
-        <div className="flex justify-center mt-2">
-          <Link to="/registration" className="text-sm text-blue-900">
-            New User?
+          <Link to="/" className="text-sm text-blue-900">
+            Existing User?
           </Link>
         </div>
 
@@ -90,7 +120,7 @@ function Home() {
           onClick={handleSubmit}
           className="w-40 h-10 bg-[#b0cde5] hover:bg-[#99bbdb] text-white rounded-full flex justify-center items-center mx-auto mt-4 mb-4 hover:scale-110 transition-transform duration-300"
         >
-          Sign in
+          Sign Up
         </button>
 
         <p className="text-center text-sm text-gray-700">
@@ -104,4 +134,4 @@ function Home() {
   );
 }
 
-export default Home;
+export default Registration;
