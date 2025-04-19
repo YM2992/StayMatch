@@ -111,7 +111,7 @@ function Registration() {
         </div>
 
         <div className="flex justify-center mt-2">
-          <Link to="/home" className="text-sm text-blue-900">
+          <Link to="/" className="text-sm text-blue-900">
             Existing User?
           </Link>
         </div>
