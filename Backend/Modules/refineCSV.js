@@ -10,6 +10,7 @@ const locationSynonyms = ['location', 'city', 'place', 'destination'];
 const priceSynonyms = ['price', 'cost', 'amount'];
 const ratingSynonyms = ['rating', 'review', 'score'];
 
+// ✅ STAGE 1: Refine Single File
 async function refineFile(inputPath, outputPath, fileName) {
     const outputDir = path.dirname(outputPath);
     if (!fs.existsSync(outputDir)) {
@@ -41,7 +42,6 @@ async function refineFile(inputPath, outputPath, fileName) {
                 const price = row[priceKey]?.trim();
                 const rating = row[ratingKey]?.trim();
 
-                // Skip invalid names
                 if (!name || !englishRegex.test(name) || !alphaRegex.test(name)) return;
 
                 const cleanedRow = {
@@ -86,4 +86,45 @@ async function refineFile(inputPath, outputPath, fileName) {
 }
 
 module.exports = refineFile;
-console.log('🎉 DONE!');
+console.log('🎉 DONE With Stage 1 Refinement!');
+
+// ✅ STAGE 2: Consolidate All Refined CSVs into BIG BOSS
+(async () => {
+    const refinedDir = path.resolve(__dirname, '../RefinedDataFiles');
+    const outputDir = path.resolve(__dirname, '../finaldata');
+    const outputFile = path.join(outputDir, 'BIG_BOSS_CSV.csv');
+
+    if (!fs.existsSync(outputDir)) {
+        fs.mkdirSync(outputDir, { recursive: true });
+    }
+
+    const mergedRows = [];
+    const refinedFiles = fs.readdirSync(refinedDir).filter(f => f.endsWith('.csv'));
+
+    for (const file of refinedFiles) {
+        const filePath = path.join(refinedDir, file);
+        const rows = [];
+
+        await new Promise((resolve, reject) => {
+            fs.createReadStream(filePath)
+                .pipe(csvParser())
+                .on('data', (row) => rows.push(row))
+                .on('end', resolve)
+                .on('error', reject);
+        });
+
+        mergedRows.push(...rows);
+    }
+
+    if (mergedRows.length === 0) {
+        console.log('⚠️ No data found in RefinedDataFiles to consolidate.');
+        return;
+    }
+
+    const finalCsv = parse(mergedRows, {
+        fields: ['Name', 'Location', 'Price', 'Currency', 'Rating'],
+    });
+
+    fs.writeFileSync(outputFile, finalCsv);
+    console.log(`📦 BIG BOSS CSV ready: ${outputFile}`);
+})();
