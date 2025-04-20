@@ -42,20 +42,21 @@ app.listen(PORT, () => {
 
 
 // Create directories if they don't exist
-const uploadDir = 'Backend/data';
-const downloadDir = 'Backend/blobDataFiles';
+const extractedDir = 'Backend/data/extracted';
+const blobDir = 'Backend/data/blob';
+const refinedDir = 'Backend/data/refined';
 
-if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
-    console.log(`Created directory: ${uploadDir}`);
-} else {
-    console.log(`Directory already exists: ${uploadDir}`);
+if (!fs.existsSync(extractedDir)) {
+    fs.mkdirSync(extractedDir, { recursive: true });
+    console.log(`Created directory: ${extractedDir}`);
 }
-if (!fs.existsSync(downloadDir)) {
-    fs.mkdirSync(downloadDir, { recursive: true });
-    console.log(`Created directory: ${downloadDir}`);
-} else {
-    console.log(`Directory already exists: ${downloadDir}`);
+if (!fs.existsSync(blobDir)) {
+    fs.mkdirSync(blobDir, { recursive: true });
+    console.log(`Created directory: ${blobDir}`);
+}
+if (!fs.existsSync(refinedDir)) {
+    fs.mkdirSync(refinedDir, { recursive: true });
+    console.log(`Created directory: ${refinedDir}`);
 }
 
 
@@ -66,18 +67,18 @@ async function main() {
 
     // Download Kaggle dataset and TripAdvisor data to Backend/data
     downloadKaggleData();
-    await TripAdvisor.downloadTripAdvisorData(uploadDir);
+    await TripAdvisor.downloadTripAdvisorData(extractedDir);
     
     // Upload all Backend/data files to Azure Blob Storage
     await new Promise((resolve, reject) => {
-        fs.readdir(uploadDir, (err, files) => {
+        fs.readdir(extractedDir, (err, files) => {
             if (err) {
                 console.error('Error reading directory:', err);
                 reject(err);
                 return;
             }
             const uploadPromises = files.map(file => {
-                const filePath = `${uploadDir}/${file}`;
+                const filePath = `${extractedDir}/${file}`;
                 return Azure.uploadBlobFile(file, filePath)
                     .then(() => {
                         console.log(`File ${file} uploaded successfully`);
@@ -93,12 +94,12 @@ async function main() {
         });
     });
     
-    // Download all blobs from Azure Blob Storage to Backend/blobDataFiles
+    // Download all blobs from Azure Blob Storage to Backend/data/blob
     await Azure.listBlobs().then(async blobs => {
         for (const blob of blobs) {
             try {
                 const content = await Azure.fetchBlob(blob.Name);
-                const filePath = `Backend/blobDataFiles/${blob.Name}`;
+                const filePath = `Backend/data/blob/blob_${blob.Name}`;
                 await fs.promises.writeFile(filePath, content);
                 console.log(`Blob ${blob.Name} saved to file: ${filePath}`);
             } catch (err) {
@@ -114,8 +115,8 @@ async function main() {
 
     const path = require('path');
 
-    const inputDir = path.join(__dirname, 'blobDataFiles');
-    const outputDir = path.join(__dirname, 'RefinedDataFiles');
+    const inputDir = blobDir;
+    const outputDir = refinedDir;
 
     (async () => {
         try {
