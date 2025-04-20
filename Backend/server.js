@@ -1,5 +1,6 @@
 require('dotenv').config();
 
+
 const currentTime = new Date();
 console.log(`Server starting: ${currentTime}`);
 // Importing required modules
@@ -19,6 +20,7 @@ const TripAdvisorAPI = require('./Modules/TripAdvisor');
 const Azure = require('./Modules/Azure');
 const Util = require('./Modules/Util');
 const downloadKaggleData = require('./Modules/fetchKaggleData');
+const refineCSV = require('./Modules/refineCSV');
 
 // initialising API modules
 const TripAdvisor = new TripAdvisorAPI(process.env.TRIPADVISOR_API_KEY);
@@ -109,6 +111,26 @@ async function main() {
     });
     
     // Refine the data
+
+    const path = require('path');
+
+    const inputDir = path.join(__dirname, 'blobDataFiles');
+    const outputDir = path.join(__dirname, 'RefinedDataFiles');
+
+    (async () => {
+        try {
+            const files = fs.readdirSync(inputDir).filter(file => file.endsWith('.csv'));
+    
+            for (const file of files) {
+                const inputPath = path.join(inputDir, file);
+                const outputPath = path.join(outputDir, `refined_${file}`);
+                await refineCSV(inputPath, outputPath, file);
+            }
+        } catch (err) {
+            console.error('🔥 Error refining CSVs:', err);
+        }
+    })();
+    
     
     
     // Load the data to the SQL database
