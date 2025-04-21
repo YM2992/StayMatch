@@ -5,10 +5,12 @@ function ProfilePage() {
     const [activeTab, setActiveTab] = useState("preferences");
 
     return (
-        <div className="flex justify-center items-center h-screen w-full bg-gradient-to-br from-[#3a506b] to-[#1c1c2b]">
+        // <div className="flex justify-center items-center h-screen w-full bg-gradient-to-br from-[#3a506b] to-[#1c1c2b]">
+        <div className="min-h-screen w-screen flex items-center justify-center bg-gradient-to-br from-[#3a506b] to-[#1c1c2b]">
             <div className="bg-gray-100 p-8 rounded-xl shadow-md w-full max-w-4xl">
+            
                 
-                <div className="flex flex-col items-center mb-8">
+                <div className="flex flex-col items-center">
                     <div className="w-24 h-24 bg-gray-300 rounded-full flex items-center justify-center text-4xl text-purple-700">
                         👤
                     </div>
