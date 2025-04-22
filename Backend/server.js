@@ -1,17 +1,20 @@
 require('dotenv').config();
-
-
 const currentTime = new Date();
 console.log(`Server starting: ${currentTime}`);
+
+
+// Global flags
+const AZURE_ENABLED = false;
+
 // Importing required modules
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-
 const app = express();
-app.use(cors({ origin: '*' }));
+const path = require('path');
 
 // Middleware for parsing request bodies
+app.use(cors({ origin: '*' }));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -61,61 +64,67 @@ if (!fs.existsSync(refinedDir)) {
 
 
 async function main() {
-    // Connect to Azure SQL and Blob Storage
-    await Azure.connectToSQL();
-    await Azure.connectToBlob();
+    // Check if Azure is enabled
+    if (!AZURE_ENABLED) {
+        console.log("Skip over Azure connection and data upload");
+    }
 
-    // Download Kaggle dataset and TripAdvisor data to Backend/data
+    // Connect to Azure SQL and Blob Storage
+    if (AZURE_ENABLED) {
+        await Azure.connectToSQL();
+        await Azure.connectToBlob();
+    }
+
+    // EXTRACT: Download Kaggle dataset and TripAdvisor data to Backend/data
     downloadKaggleData();
     await TripAdvisor.downloadTripAdvisorData(extractedDir);
     
     // Upload all Backend/data files to Azure Blob Storage
-    await new Promise((resolve, reject) => {
-        fs.readdir(extractedDir, (err, files) => {
-            if (err) {
-                console.error('Error reading directory:', err);
-                reject(err);
-                return;
-            }
-            const uploadPromises = files.map(file => {
-                const filePath = `${extractedDir}/${file}`;
-                return Azure.uploadBlobFile(file, filePath)
-                    .then(() => {
-                        console.log(`File ${file} uploaded successfully`);
-                    })
-                    .catch(err => {
-                        console.error(`Error uploading file ${file}:`, err);
-                        throw err;
-                    });
+    if (AZURE_ENABLED) {
+        await new Promise((resolve, reject) => {
+            fs.readdir(extractedDir, (err, files) => {
+                if (err) {
+                    console.error('Error reading directory:', err);
+                    reject(err);
+                    return;
+                }
+                const uploadPromises = files.map(file => {
+                    const filePath = `${extractedDir}/${file}`;
+                    return Azure.uploadBlobFile(file, filePath)
+                        .then(() => {
+                            console.log(`File ${file} uploaded successfully`);
+                        })
+                        .catch(err => {
+                            console.error(`Error uploading file ${file}:`, err);
+                            throw err;
+                        });
+                });
+                Promise.all(uploadPromises)
+                    .then(() => resolve())
+                    .catch(reject);
             });
-            Promise.all(uploadPromises)
-                .then(() => resolve())
-                .catch(reject);
         });
-    });
-    
-    // Download all blobs from Azure Blob Storage to Backend/data/blob
-    await Azure.listBlobs().then(async blobs => {
-        for (const blob of blobs) {
-            try {
-                const content = await Azure.fetchBlob(blob.Name);
-                const filePath = `Backend/data/blob/blob_${blob.Name}`;
-                await fs.promises.writeFile(filePath, content);
-                console.log(`Blob ${blob.Name} saved to file: ${filePath}`);
-            } catch (err) {
-                console.error(`Error processing blob ${blob.Name}:`, err);
+        
+        // Download all blobs from Azure Blob Storage to Backend/data/blob
+        await Azure.listBlobs().then(async blobs => {
+            for (const blob of blobs) {
+                try {
+                    const content = await Azure.fetchBlob(blob.Name);
+                    const filePath = `Backend/data/blob/blob_${blob.Name}`;
+                    await fs.promises.writeFile(filePath, content);
+                    console.log(`Blob ${blob.Name} saved to file: ${filePath}`);
+                } catch (err) {
+                    console.error(`Error processing blob ${blob.Name}:`, err);
+                }
             }
-        }
-        console.log('List of blobs:', blobs);
-    }).catch(err => {
-        console.error('Error listing blobs:', err);
-    });
-    
-    // Refine the data
-
-    const path = require('path');
-
-    const inputDir = blobDir;
+            console.log('List of blobs:', blobs);
+        }).catch(err => {
+            console.error('Error listing blobs:', err);
+        });
+    }
+        
+    // REFINE: Refine/transform the data
+    const inputDir = AZURE_ENABLED ? blobDir : extractedDir;
     const outputDir = refinedDir;
 
     (async () => {
@@ -134,7 +143,7 @@ async function main() {
     
     
     
-    // Load the data to the SQL database
+    // LOAD: Load the data to the SQL database
 }
 
 main().catch(err => {
