@@ -4,7 +4,7 @@ import eyeIcon from '../assets/eye.svg';
 import eyeOffIcon from '../assets/eye-off.svg';
 import profileIcon from '../assets/profile-icon.svg';
 
-function ProfilePage() {
+function Profile() {
     const [activeTab, setActiveTab] = useState("preferences");
     const [showPassword, setShowPassword] = useState(false);
 
@@ -115,4 +115,4 @@ function ProfilePage() {
     );
 }
 
-export default ProfilePage;
+export default Profile;
