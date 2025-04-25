@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import profileIcon from "../assets/profile-icon.svg";
+import logo from "../assets/logo.png";
 
 function ForgotPassword() {
     const [showOldPassword, setShowOldPassword] = useState(false);
@@ -8,18 +9,18 @@ function ForgotPassword() {
 
     return (
         <div className="min-h-screen w-screen flex items-center justify-center bg-gradient-to-br from-[#3a506b] to-[#1c1c2b]">
-            <div className="bg-gray-100 p-8 rounded-xl shadow-md w-full max-w-xl">
+            <div className="bg-gray-100 p-8 rounded-xl shadow-md w-full max-w-sm relative">
 
-                {/* Avatar + Heading */}
+                {/* Logo + Heading */}
                 <div className="flex flex-col items-center">
-                    <div className="w-24 h-24 bg-gray-300 rounded-full flex items-center justify-center overflow-hidden">
-                        <img 
-                            src={profileIcon} 
-                            alt="Profile" 
-                            className="w-full h-full object-cover"
+                    <div className="absolute -top-16 w-32 h-32 bg-gray-300 rounded-full flex justify-center items-center">
+                        <img
+                            src={logo}
+                            alt="StayMatch"
+                            className="w-[100%] h-[100%] rounded-full"
                         />
                     </div>
-                    <h2 className="text-2xl font-semibold text-black mt-4">Change Password</h2>
+                    <h2 className="text-2xl font-semibold text-black mt-20">Change Password</h2>
                     <p className="text-sm text-gray-700 mt-2 text-center">Update your password securely</p>
                 </div>
 
@@ -68,6 +69,12 @@ function ForgotPassword() {
                                 {showNewPassword ? "Hide" : "Show"}
                             </button>
                         </div>
+                    </div>
+
+                    <div className="flex justify-center mt-2">
+                        <Link to="/" className="text-sm text-blue-900">
+                            Back to Sign In
+                        </Link>
                     </div>
 
                     <button
