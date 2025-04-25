@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import eyeIcon from '../assets/eye.svg';
-import eyeOffIcon from '../assets/eye-off.svg';
-import profileIcon from '../assets/profile-icon.svg';
+import eyeIcon from "../assets/eye.svg";
+import eyeOffIcon from "../assets/eye-off.svg";
+import profileIcon from "../assets/profile-icon.svg";
+import homeIcon from "../assets/home-icon.svg";
 
 function Profile() {
     const [activeTab, setActiveTab] = useState("preferences");
@@ -15,9 +16,14 @@ function Profile() {
 
                 {/* Home Button */}
                 <div className="flex justify-end">
-                    <button className="text-sm text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-md shadow-md">
-                        Home
-                    </button>
+                    <Link to="/">
+                        <button className="icon-btn ml-2 p-1">
+                            <img
+                                src={homeIcon}
+                                alt="Home"
+                                className="w-5 h-5"/>
+                        </button>
+                    </Link>
                 </div>
 
                 {/* Profile Section */}
