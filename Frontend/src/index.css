@@ -67,4 +67,9 @@ button.icon-btn {
   button {
     background-color: #f9f9f9;
   }
+  
 }
+.filter-btn {
+  @apply px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300 transition;
+}
+
