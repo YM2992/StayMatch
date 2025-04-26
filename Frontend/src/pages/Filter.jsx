@@ -13,26 +13,23 @@ const MOCK_API_DATA = {
 export default function Filter() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [options, setOptions] = useState([]); // options to display as buttons
+  const [options, setOptions] = useState([]); // Available options to show as buttons
   const [activeFilter, setActiveFilter] = useState(null);
-  const [selectedFilters, setSelectedFilters] = useState({});
+  const [selectedFilters, setSelectedFilters] = useState({}); // { Location: ["Paris", "Tokyo"], Amenities: ["Wi-Fi"] }
 
   const handleFilterClick = async (filterType) => {
     setLoading(true);
     setError(null);
     setActiveFilter(filterType);
-    setOptions([]); // reset options when clicking new filter
+    setOptions([]); // Reset options when switching filter
 
     try {
-      // simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 800));
-
+      await new Promise((resolve) => setTimeout(resolve, 800)); // Simulate API delay
       const fetchedOptions = MOCK_API_DATA[filterType];
-      if (!fetchedOptions) {
-        throw new Error("Data not found");
-      }
+      if (!fetchedOptions) throw new Error("Data not found");
 
       setOptions(fetchedOptions);
+      toast.success(`Fetched ${filterType} options! 🚀`);
     } catch (err) {
       console.error(err);
       setError("Failed to fetch data. Please try again.");
@@ -42,14 +39,38 @@ export default function Filter() {
     }
   };
 
-  const handleOptionSelect = (filterType, option) => {
-    setSelectedFilters((prev) => ({
-      ...prev,
-      [filterType]: option,
-    }));
+  const handleOptionToggle = (filterType, option) => {
+    setSelectedFilters((prev) => {
+      const currentSelections = prev[filterType] || [];
+      const isSelected = currentSelections.includes(option);
+
+      if (isSelected) {
+        // Deselect
+        const updatedSelections = currentSelections.filter(
+          (item) => item !== option
+        );
+        if (updatedSelections.length === 0) {
+          const { [filterType]: _, ...rest } = prev;
+          return rest;
+        } else {
+          return {
+            ...prev,
+            [filterType]: updatedSelections,
+          };
+        }
+      } else {
+        // Select
+        return {
+          ...prev,
+          [filterType]: [...currentSelections, option],
+        };
+      }
+    });
   };
 
-  const hasSelectedFilters = Object.keys(selectedFilters).length > 0;
+  const isOptionSelected = (filterType, option) => {
+    return selectedFilters[filterType]?.includes(option);
+  };
 
   return (
     <div className="min-h-screen w-full flex justify-center items-center bg-gradient-to-br from-[#3a506b] to-[#1c1c2b] p-6">
@@ -65,6 +86,7 @@ export default function Filter() {
             </button>
           </div>
         </div>
+
         {/* Filters */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
           {["Location", "Amenities", "Price", "Bed", "Rooms"].map((filter) => (
@@ -79,6 +101,7 @@ export default function Filter() {
             </button>
           ))}
         </div>
+
         {/* Options Area */}
         {
           <div className="border border-dashed border-gray-400 p-6 mb-8 bg-white rounded-md min-h-[150px]">
@@ -96,8 +119,12 @@ export default function Filter() {
                 {options.map((option) => (
                   <button
                     key={option}
-                    className="px-4 py-2 bg-[#b0cde5] hover:bg-[#99bbdb] rounded-full text-white transition-transform hover:scale-110"
-                    onClick={() => handleOptionSelect(activeFilter, option)}
+                    className={`px-4 py-2 rounded-full text-white transition-transform hover:scale-110 ${
+                      isOptionSelected(activeFilter, option)
+                        ? "bg-green-500"
+                        : "bg-[#b0cde5] hover:bg-[#99bbdb]"
+                    }`}
+                    onClick={() => handleOptionToggle(activeFilter, option)}
                   >
                     {option}
                   </button>
@@ -106,22 +133,45 @@ export default function Filter() {
             )}
           </div>
         }
-        {/* Selected Filters Card */}(
-        <div className="border border-dashed border-gray-400 p-6 bg-white rounded-md min-h-[150px] mb-8">
-          <h2 className="text-xl font-semibold mb-4 text-black">
-            Selected Filters
-          </h2>
-          <ul className="list-disc list-inside text-gray-700">
-            {Object.entries(selectedFilters).map(
-              ([filterType, selectedValue]) => (
-                <li key={filterType}>
-                  <strong>{filterType}:</strong> {selectedValue}
-                </li>
-              )
-            )}
-          </ul>
-        </div>
-        ){/* Search Button */}
+
+        {/* Selected Filters Card */}
+        {
+          <div className="border border-dashed border-gray-400 p-6 bg-white rounded-md min-h-[150px] mb-8">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold text-black">
+                Selected Filters
+              </h2>
+              <button
+                onClick={() => setSelectedFilters({})}
+                className="px-4 py-2 bg-red-400 hover:bg-red-500 text-white rounded-full text-sm transition-transform hover:scale-110"
+              >
+                Clear All
+              </button>
+            </div>
+            <div className="flex flex-wrap gap-4">
+              {Object.entries(selectedFilters).map(([filterType, options]) =>
+                options.map((option) => (
+                  <div
+                    key={`${filterType}-${option}`}
+                    className="px-4 py-2 bg-[#b0cde5] text-white rounded-full flex items-center gap-2"
+                  >
+                    <span className="text-sm">
+                      {filterType}: {option}
+                    </span>
+                    <button
+                      onClick={() => handleOptionToggle(filterType, option)}
+                      className="text-white"
+                    >
+                      ❌
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        }
+
+        {/* Search Button */}
         <div className="flex justify-center">
           <button className="w-40 h-10 bg-[#b0cde5] hover:bg-[#99bbdb] text-white rounded-full flex justify-center items-center hover:scale-110 transition-transform duration-300">
             SEARCH
