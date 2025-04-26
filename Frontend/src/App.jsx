@@ -1,4 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
+
 import Home from "./pages/Home";
 import Registration from "./pages/Registration";
 import Filter from "./pages/Filter";
@@ -6,6 +8,7 @@ import Filter from "./pages/Filter";
 function App() {
   return (
     <BrowserRouter>
+      <Toaster />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/registration" element={<Registration />} />
