@@ -29,7 +29,7 @@ export default function Filter() {
       if (!fetchedOptions) throw new Error("Data not found");
 
       setOptions(fetchedOptions);
-      toast.success(`Fetched ${filterType} options! 🚀`);
+      //toast.success(`Fetched ${filterType} options!`);
     } catch (err) {
       console.error(err);
       setError("Failed to fetch data. Please try again.");
@@ -92,8 +92,8 @@ export default function Filter() {
           {["Location", "Amenities", "Price", "Bed", "Rooms"].map((filter) => (
             <button
               key={filter}
-              className={`filter-btn ${
-                activeFilter === filter ? "bg-[#b0cde5] text-white" : ""
+              className={` ${
+                activeFilter === filter ? "bg-[#1a4467] text-white" : ""
               }`}
               onClick={() => handleFilterClick(filter)}
             >
@@ -153,7 +153,7 @@ export default function Filter() {
                 options.map((option) => (
                   <div
                     key={`${filterType}-${option}`}
-                    className="px-4 py-2 bg-[#b0cde5] text-white rounded-full flex items-center gap-2"
+                    className="px-4 py-2 bg-[#546f85] text-white rounded-xl flex items-center gap-2"
                   >
                     <span className="text-sm">
                       {filterType}: {option}
@@ -162,7 +162,7 @@ export default function Filter() {
                       onClick={() => handleOptionToggle(filterType, option)}
                       className="text-white"
                     >
-                      ❌
+                      X
                     </button>
                   </div>
                 ))
