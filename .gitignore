@@ -1,3 +1,8 @@
+# Local files
+Backend/data/*
+Backend/blobDataFiles/*
+
+
 # Logs
 logs
 *.log
