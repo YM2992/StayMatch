@@ -16,24 +16,31 @@ function ForgotPassword() {
         let isValid = true;
 
         if (!/\S+@\S+\.\S+/.test(email)) {
-        setEmailError("Please enter a valid email.");
-        isValid = false;
+            setEmailError("Please enter a valid email.");
+            isValid = false;
         } else {
-        setEmailError("");
+            setEmailError("");
         }
 
         if (oldPassword.length < 6) {
-        setOldPasswordError("Old password must be at least 6 characters.");
-        isValid = false;
+            setOldPasswordError("Old password must be at least 6 characters.");
+            isValid = false;
         } else {
-        setOldPasswordError("");
+            setOldPasswordError("");
         }
 
         if (newPassword.length < 6) {
-        setNewPasswordError("New password must be at least 6 characters.");
-        isValid = false;
+            setNewPasswordError("New password must be at least 6 characters.");
+            isValid = false;
         } else {
-        setNewPasswordError("");
+            setNewPasswordError("");
+        }
+
+        if (newPassword == oldPassword) {
+            setNewPasswordError("New password must be different to old password.");
+            isValid = false;
+        } else {
+            setNewPasswordError("")
         }
 
         return isValid;
