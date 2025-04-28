@@ -16,6 +16,9 @@ function Registration() {
   const [nameError, setNameError] = useState("");
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
 
+  const [securityQuestion, setSecurityQuestion] = useState("");
+  const [securityAnswer, setSecurityAnswer] = useState("");
+
   const validate = () => {
     let isValid = true;
 
@@ -58,7 +61,8 @@ function Registration() {
   };
 
   return (
-    <div className="flex justify-center items-center h-screen w-full bg-gradient-to-br from-[#3a506b] to-[#1c1c2b]">
+    // <div className="flex justify-center items-center h-screen w-full bg-gradient-to-br from-[#3a506b] to-[#1c1c2b] py-20">
+    <div className="flex justify-center min-h-screen w-full bg-gradient-to-br from-[#3a506b] to-[#1c1c2b] py-20">
       <div className="bg-gray-100 p-8 rounded-xl shadow-md w-full max-w-sm relative">
         <div className="flex flex-col items-center">
           <div className="absolute -top-16 w-32 h-32 bg-gray-300 rounded-full flex justify-center items-center">
@@ -108,6 +112,32 @@ function Registration() {
               {confirmPasswordError}
             </p>
           )}
+
+          <div className="flex flex-col mb-4">
+            <label className="text-sm font-medium text-gray-700 mb-1">
+              Security Question
+            </label>
+            <select
+              value={securityQuestion}
+              onChange={(e) => setSecurityQuestion(e.target.value)}
+              className="w-full h-10 px-4 py-2 border rounded-md shadow-sm bg-white text-gray-700"
+            >
+              <option value="">Select a question...</option>
+              <option value="What was your first pet's name?">What was your first pet's name?</option>
+              <option value="What is your mother's maiden name?">What is your mother's maiden name?</option>
+              <option value="What was the name of your primary school?">What was the name of your primary school?</option>
+              <option value="What is your favourite food?">What is your favourite food?</option>
+              <option value="In what city were you born?">In what city were you born?</option>
+            </select>
+          </div>
+
+          <Input
+            type="text"
+            field="Security Answer"
+            value={securityAnswer}
+            func={setSecurityAnswer}
+          />
+          
         </div>
 
         <div className="flex justify-center mt-2">
