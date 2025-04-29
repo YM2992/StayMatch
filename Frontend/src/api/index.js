@@ -2,6 +2,7 @@ const API_URL = "http://localhost:8000/api";
 const paths = {
     login: "user/login",
     register: "user/register",
+    forgotPassword: "user/forgot-password",
     update: "user/update",
     delete: "user/delete",
     getUser: "user/get"

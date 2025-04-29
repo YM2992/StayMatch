@@ -2,6 +2,8 @@ import Input from "../components/Input";
 import { useState } from "react";
 import logo from "../assets/logo.png";
 import { Link } from "react-router-dom";
+import api from "../api";
+
 
 function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -42,9 +44,26 @@ function ForgotPassword() {
     return isValid;
   };
 
-  const handleClick = () => {
+  const handleClick = async () => {
     if (validate()) {
-      alert("Verification successful! Password changed.");
+      console.log("Changing password to:", email, newPassword);
+
+      const data = {
+        email: email,
+        newPassword: newPassword,
+        securityQuestion: securityQuestion,
+        securityAnswer: securityAnswer
+      };
+
+      const response = await api.httpPost(api.paths.forgotPassword, data);
+
+      if (response.error) {
+        alert("Reset password failed: " + response.error);
+      } else {
+        alert("Reset password successful! Please login with your new password.");
+        // Redirect to login page
+        window.location.href = "/";
+      }
     }
   };
 

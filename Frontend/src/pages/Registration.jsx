@@ -64,6 +64,8 @@ function Registration() {
         name: name,
         email: email,
         password: password,
+        securityQuestion: securityQuestion,
+        securityAnswer: securityAnswer
       };
 
       const response = await api.httpPost(api.paths.register, data);
@@ -72,7 +74,8 @@ function Registration() {
         alert("Registration failed: " + response.error);
       } else {
         alert("Registration successful!");
-        // Redirect to dashboard or perform other actions
+        // Redirect to login page
+        window.location.href = "/";
       }
     }
   };

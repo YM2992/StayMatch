@@ -47,8 +47,8 @@ function Home() {
       if (response.error) {
         alert("Login failed: " + response.error);
       } else {
-        alert("Login successful!");
-        // Redirect to dashboard or perform other actions
+        // Redirect to filter page
+        window.location.href = "/filter";
       }
     }
   };
