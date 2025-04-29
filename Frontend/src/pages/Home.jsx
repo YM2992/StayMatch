@@ -91,7 +91,7 @@ function Home() {
         </div>
 
         <div className="flex justify-center mt-2">
-          <Link to="forgot-password" className="text-sm text-blue-900">
+          <Link to="/forgot-password" className="text-sm text-blue-900">
             Forgot Password?
           </Link>
         </div>
