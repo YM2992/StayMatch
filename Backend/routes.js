@@ -8,16 +8,17 @@ const routes = [
         path: `${apiPath}/user/register`,
         method: 'post',
         handler: async (req, res) => {
-            const { email, password, first_name, last_name } = req.body;
+            const { email, password, name } = req.body;
 
-            if (!email || !password || !first_name || !last_name) {
+            if (!email || !password || !name) {
                 return res.status(400).json({ error: 'All fields are required' });
             }
 
             try {
-                const userId = await registerUser({ email, password, first_name, last_name });
+                const userId = await userHandler.registerUser({ email, password, name });
                 return res.status(201).json({ message: 'User registered successfully', userId });
             } catch (error) {
+                console.error('Registration error:', error);
                 return res.status(500).json({ error: 'An error occurred during registration' });
             }
         }
@@ -26,15 +27,15 @@ const routes = [
         path: `${apiPath}/user/login`,
         method: 'post',
         handler: async (req, res) => {
-            const { username, password } = req.body;
+            const { email, password } = req.body;
 
-            if (!username || !password) {
-                return res.status(400).json({ error: 'Username and password are required' });
+            if (!email || !password) {
+                return res.status(400).json({ error: 'Email and password are required' });
             }
 
             try {
                 // Replace with actual authentication logic
-                const user = await authenticateUser(username, password);
+                const user = await userHandler.authenticateUser(email, password);
 
                 if (!user) {
                     return res.status(401).json({ error: 'Invalid credentials' });
@@ -83,7 +84,7 @@ const routes = [
                 if (amenities) filters.amenities = amenities;
 
                 // Replace with actual logic to fetch hotels based on filters
-                const hotels = await getHotels(filters);
+                const hotels = await hotelHandler.getHotels(filters);
 
                 return res.status(200).json({ hotels });
             } catch (error) {

@@ -1,14 +1,17 @@
 require('dotenv').config();
-
-
 const currentTime = new Date();
 console.log(`Server starting: ${currentTime}`);
+
+
+// Global flags
+const AZURE_ENABLED = false;
+
 // Importing required modules
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const path = require('path');
 const app = express();
+const path = require('path');
 
 // Middleware for parsing request bodies
 app.use(cors({ origin: '*' }));
@@ -19,7 +22,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 const TripAdvisorAPI = require('./Modules/TripAdvisor');
 const Azure = require('./Modules/Azure');
 const Util = require('./Modules/Util');
-const hotelHandler = require('./Handlers/hotelHandler');
 const downloadKaggleData = require('./Modules/fetchKaggleData');
 const refineCSV = require('./Modules/refineCSV');
 
@@ -43,76 +45,84 @@ app.listen(PORT, () => {
 
 
 // Create directories if they don't exist
-const uploadDir = 'Backend/data';
-const downloadDir = 'Backend/blobDataFiles';
+const extractedDir = 'Backend/data/extracted';
+const blobDir = 'Backend/data/blob';
+const refinedDir = 'Backend/data/refined';
 
-if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
-    console.log(`Created directory: ${uploadDir}`);
-} else {
-    console.log(`Directory already exists: ${uploadDir}`);
+if (!fs.existsSync(extractedDir)) {
+    fs.mkdirSync(extractedDir, { recursive: true });
+    console.log(`Created directory: ${extractedDir}`);
 }
-if (!fs.existsSync(downloadDir)) {
-    fs.mkdirSync(downloadDir, { recursive: true });
-    console.log(`Created directory: ${downloadDir}`);
-} else {
-    console.log(`Directory already exists: ${downloadDir}`);
+if (!fs.existsSync(blobDir)) {
+    fs.mkdirSync(blobDir, { recursive: true });
+    console.log(`Created directory: ${blobDir}`);
+}
+if (!fs.existsSync(refinedDir)) {
+    fs.mkdirSync(refinedDir, { recursive: true });
+    console.log(`Created directory: ${refinedDir}`);
 }
 
 
 async function main() {
+    // Check if Azure is enabled
+    if (!AZURE_ENABLED) {
+        console.log("Skip over Azure data upload");
+    }
+
     // Connect to Azure SQL and Blob Storage
     await Azure.connectToSQL();
     await Azure.connectToBlob();
 
-    // Download Kaggle dataset and TripAdvisor data to Backend/data
+    // EXTRACT: Download Kaggle dataset and TripAdvisor data to Backend/data
     downloadKaggleData();
-    await TripAdvisor.downloadTripAdvisorData(uploadDir);
+    await TripAdvisor.downloadTripAdvisorData(extractedDir);
     
     // Upload all Backend/data files to Azure Blob Storage
-    await new Promise((resolve, reject) => {
-        fs.readdir(uploadDir, (err, files) => {
-            if (err) {
-                console.error('Error reading directory:', err);
-                reject(err);
-                return;
-            }
-            const uploadPromises = files.map(file => {
-                const filePath = `${uploadDir}/${file}`;
-                return Azure.uploadBlobFile(file, filePath)
-                    .then(() => {
-                        console.log(`File ${file} uploaded successfully`);
-                    })
-                    .catch(err => {
-                        console.error(`Error uploading file ${file}:`, err);
-                        throw err;
-                    });
+    if (AZURE_ENABLED) {
+        await new Promise((resolve, reject) => {
+            fs.readdir(extractedDir, (err, files) => {
+                if (err) {
+                    console.error('Error reading directory:', err);
+                    reject(err);
+                    return;
+                }
+                const uploadPromises = files.map(file => {
+                    const filePath = `${extractedDir}/${file}`;
+                    return Azure.uploadBlobFile(file, filePath)
+                        .then(() => {
+                            console.log(`File ${file} uploaded successfully`);
+                        })
+                        .catch(err => {
+                            console.error(`Error uploading file ${file}:`, err);
+                            throw err;
+                        });
+                });
+                Promise.all(uploadPromises)
+                    .then(() => resolve())
+                    .catch(reject);
             });
-            Promise.all(uploadPromises)
-                .then(() => resolve())
-                .catch(reject);
         });
-    });
-    
-    // Download all blobs from Azure Blob Storage to Backend/blobDataFiles
-    await Azure.listBlobs().then(async blobs => {
-        for (const blob of blobs) {
-            try {
-                const content = await Azure.fetchBlob(blob.Name);
-                const filePath = `Backend/blobDataFiles/blob_${blob.Name}`;
-                await fs.promises.writeFile(filePath, content);
-                console.log(`Blob ${blob.Name} saved to file: ${filePath}`);
-            } catch (err) {
-                console.error(`Error processing blob ${blob.Name}:`, err);
+        
+        // Download all blobs from Azure Blob Storage to Backend/data/blob
+        await Azure.listBlobs().then(async blobs => {
+            for (const blob of blobs) {
+                try {
+                    const content = await Azure.fetchBlob(blob.Name);
+                    const filePath = `Backend/data/blob/blob_${blob.Name}`;
+                    await fs.promises.writeFile(filePath, content);
+                    console.log(`Blob ${blob.Name} saved to file: ${filePath}`);
+                } catch (err) {
+                    console.error(`Error processing blob ${blob.Name}:`, err);
+                }
             }
-        }
-        console.log('List of blobs:', blobs);
-    }).catch(err => {
-        console.error('Error listing blobs:', err);
-    });
-    
-    // Refine the data
-    const inputDir = blobDir;
+            console.log('List of blobs:', blobs);
+        }).catch(err => {
+            console.error('Error listing blobs:', err);
+        });
+    }
+        
+    // REFINE: Refine/transform the data
+    const inputDir = AZURE_ENABLED ? blobDir : extractedDir;
     const outputDir = refinedDir;
 
     (async () => {
@@ -130,111 +140,8 @@ async function main() {
     })();
     
     
-    // Insert dummy data into the Azure SQL database
-    // const dummyData = [
-    //     {
-    //         name: 'الوادي للوحدات السكنية',
-    //         location: 'Riyadh Al Khabra Show on map',
-    //         price: 200,
-    //         beds: '2 single beds',
-    //         room_type: 'Deluxe Twin Room',
-    //         rating: 8.5
-    //     },
-    //     {
-    //         name: 'فندق سوار',
-    //         location: 'Sīdī Ḩamzah Show on map',
-    //         price: 145,
-    //         beds: '2 single beds',
-    //         room_type: 'Small Twin Room',
-    //         rating: 8.6
-    //     },
-    //     {
-    //         name: 'Golden Dakhil',
-    //         location: 'Qabāʼ Show on map',
-    //         price: 100,
-    //         beds: '1 extra-large double bed',
-    //         room_type: 'Economy Double Room',
-    //         rating: 7.3
-    //     }
-    // ];
-
-    // try {
-    //     const columns = ['name', 'location', 'price', 'beds', 'room_type', 'rating'];
-    //     await hotelHandler.insertHotels(dummyData);
-    //     console.log('Dummy data inserted successfully:', dummyData);
-    // } catch (err) {
-    //     console.error('Error inserting dummy data:', err);
-    // }
     
-    // Load the data from refinedFiles to the SQL database
-    const refinedFiles = fs.readdirSync(refinedDir).filter(file => file.endsWith('.csv'));
-    for (const file of refinedFiles) {
-        const filePath = `${refinedDir}/${file}`;
-        const csvData = fs.readFileSync(filePath, 'utf8');
-        const rows = csvData.split('\n').filter(row => row.trim() !== '');
-        const headers = rows[0].split(',').map(header => header.replace(/"/g, ''));
-
-        const entries = rows.slice(1).map(row => {
-            const values = row.split(',').map(value => value.replace(/"/g, ''));
-            return headers.reduce((obj, header, index) => {
-                obj[header.trim()] = values[index]?.trim();
-                return obj;
-            }, {});
-        }).filter(entry => !Object.values(entry).some(value => value === null || value === undefined || value === ''));
-
-        // Apply development/testing limit of 20 entries
-        const limitedEntries = entries.slice(0, 20);
-
-        if (limitedEntries.length > 0) {
-            for (const entry of limitedEntries) {
-                try {
-                    // Check if the hotel already exists by name
-                    const query = `SELECT * FROM Hotel WHERE name = @name`;
-                    const params = [{ name: 'name', type: 'NVarChar', value: entry.name }];
-                    const existingHotel = await Azure.executeQuery(query, params);
-
-                    if (existingHotel.length > 0) {
-                        // Update the existing hotel
-                        const updateQuery = `
-                            UPDATE Hotels
-                            SET location = @location, price = @price, beds = @beds, room_type = @room_type, rating = @rating
-                            WHERE name = @name
-                        `;
-                        const updateParams = [
-                            { name: 'location', type: 'NVarChar', value: entry.location },
-                            { name: 'price', type: 'Float', value: entry.price },
-                            { name: 'beds', type: 'NVarChar', value: entry.beds },
-                            { name: 'room_type', type: 'NVarChar', value: entry.room_type },
-                            { name: 'rating', type: 'Float', value: entry.rating },
-                            { name: 'name', type: 'NVarChar', value: entry.name }
-                        ];
-                        await Azure.executeQuery(updateQuery, updateParams);
-                        console.log(`Updated hotel: ${entry.name}`);
-                    } else {
-                        // Insert as a new hotel
-                        const insertQuery = `
-                            INSERT INTO Hotel (name, location, price, beds, room_type, rating)
-                            VALUES (@name, @location, @price, @beds, @room_type, @rating)
-                        `;
-                        const insertParams = [
-                            { name: 'name', type: 'NVarChar', value: entry.name },
-                            { name: 'location', type: 'NVarChar', value: entry.location },
-                            { name: 'price', type: 'Float', value: entry.price },
-                            { name: 'beds', type: 'NVarChar', value: entry.beds },
-                            { name: 'room_type', type: 'NVarChar', value: entry.room_type },
-                            { name: 'rating', type: 'Float', value: entry.rating }
-                        ];
-                        await Azure.executeQuery(insertQuery, insertParams);
-                        console.log(`Inserted new hotel: ${entry.name}`);
-                    }
-                } catch (err) {
-                    console.error(`Error processing entry for ${entry.name}:`, err);
-                }
-            }
-        } else {
-            console.warn(`No valid entries to process from ${file}`);
-        }
-    }
+    // LOAD: Load the data to the SQL database
 }
 
 main().catch(err => {
