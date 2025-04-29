@@ -8,18 +8,18 @@ const routes = [
         path: `${apiPath}/user/register`,
         method: 'post',
         handler: async (req, res) => {
-            const { email, password, name } = req.body;
+            const { name, email, password, securityQuestion, securityAnswer } = req.body;
 
-            if (!email || !password || !name) {
+            if (!name || !email || !password || !securityQuestion || !securityAnswer) {
                 return res.status(400).json({ error: 'All fields are required' });
             }
 
             try {
-                const userId = await userHandler.registerUser({ email, password, name });
+                const userId = await userHandler.registerUser(name, email, password, securityQuestion, securityAnswer);
                 return res.status(201).json({ message: 'User registered successfully', userId });
             } catch (error) {
                 console.error('Registration error:', error);
-                return res.status(500).json({ error: 'An error occurred during registration' });
+                return res.status(500).json({ error: error.message || 'An error occurred during registration' });
             }
         }
     },
@@ -43,7 +43,7 @@ const routes = [
 
                 return res.status(200).json({ message: 'Login successful', user });
             } catch (error) {
-                return res.status(500).json({ error: 'An error occurred during login' });
+                return res.status(500).json({ error: error.message || 'An error occurred during login' });
             }
         }
     },
@@ -61,10 +61,30 @@ const routes = [
                 await updateUser(userId, updatedFields);
                 return res.status(200).json({ message: 'User updated successfully' });
             } catch (error) {
-                return res.status(500).json({ error: 'An error occurred during user update' });
+                return res.status(500).json({ error: error.message || 'An error occurred during user update' });
             }
         }
     },
+    {
+        path: `${apiPath}/user/forgot-password`,
+        method: 'post',
+        handler: async (req, res) => {
+            const { email, newPassword, securityQuestion, securityAnswer } = req.body;
+
+            if (!email || !newPassword || !securityQuestion || !securityAnswer) {
+                return res.status(400).json({ error: 'All fields are required' });
+            }
+
+            try {
+                // Replace with actual logic to reset password
+                await userHandler.resetPassword(email, newPassword, securityQuestion, securityAnswer);
+                return res.status(200).json({ message: 'Password reset successfully' });
+            } catch (error) {
+                return res.status(500).json({ error: error.message || 'An error occurred during password reset' });
+            }
+        }
+    },
+    
 
     /* Hotels */
     {
@@ -88,7 +108,7 @@ const routes = [
 
                 return res.status(200).json({ hotels });
             } catch (error) {
-                return res.status(500).json({ error: 'An error occurred while fetching hotels' });
+                return res.status(500).json({ error: error.message || 'An error occurred while fetching hotels' });
             }
         }
     }
