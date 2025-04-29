@@ -2,6 +2,8 @@ import Input from "../components/Input";
 import { useState } from "react";
 import logo from "../assets/logo.png";
 import { Link } from "react-router-dom";
+import api from "../api";
+
 
 function Home() {
   const [email, setEmail] = useState("");
@@ -34,6 +36,20 @@ function Home() {
   const handleSubmit = async () => {
     if (validate()) {
       console.log("Logging in with:", email, password);
+      
+      const data = {
+        email: email,
+        password: password,
+      }
+
+      const response = await api.httpPost(api.paths.login, data);
+
+      if (response.error) {
+        alert("Login failed: " + response.error);
+      } else {
+        alert("Login successful!");
+        // Redirect to dashboard or perform other actions
+      }
     }
   };
 

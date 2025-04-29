@@ -2,6 +2,8 @@ import Input from "../components/Input";
 import { useState } from "react";
 import logo from "../assets/logo.png";
 import { Link } from "react-router-dom";
+import api from "../api";
+
 
 function Registration() {
   const [email, setEmail] = useState("");
@@ -57,6 +59,21 @@ function Registration() {
   const handleSubmit = async () => {
     if (validate()) {
       console.log("Logging in with:", email, password);
+
+      const data = {
+        name: name,
+        email: email,
+        password: password,
+      };
+
+      const response = await api.httpPost(api.paths.register, data);
+
+      if (response.error) {
+        alert("Registration failed: " + response.error);
+      } else {
+        alert("Registration successful!");
+        // Redirect to dashboard or perform other actions
+      }
     }
   };
 

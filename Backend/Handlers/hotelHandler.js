@@ -1,6 +1,40 @@
 const { executeQuery } = require('../Modules/Azure');
 let hotelHandler = {};
 
+hotelHandler.insertHotels = async function(hotelData) {
+    if (!Array.isArray(hotelData)) {
+        throw new Error('hotelData must be an array of hotel objects');
+    }
+
+    const values = [];
+    const params = [];
+
+    hotelData.forEach((hotel, index) => {
+        const { name, location, price, beds, room_type, rating } = hotel;
+        values.push(`(@name${index}, @location${index}, @price${index}, @beds${index}, @room_type${index}, @rating${index})`);
+        params.push(
+            { name: `name${index}`, type: 'varchar', value: name },
+            { name: `location${index}`, type: 'varchar', value: location },
+            { name: `price${index}`, type: 'int', value: price },
+            { name: `beds${index}`, type: 'int', value: beds },
+            { name: `room_type${index}`, type: 'varchar', value: room_type },
+            { name: `rating${index}`, type: 'float', value: rating }
+        );
+    });
+
+    const query = `
+        INSERT INTO Hotel (name, location, price, beds, room_type, rating)
+        VALUES ${values.join(', ')}
+    `;
+
+    try {
+        await executeQuery(query, params);
+        return { message: 'Hotels inserted successfully' };
+    } catch (err) {
+        console.error('Error inserting hotels:', err);
+        throw err;
+    }
+}
 
 hotelHandler.getHotels = async function(filters) {
     const { branch_name, address, price, room_count, bed_count, amenities } = filters;

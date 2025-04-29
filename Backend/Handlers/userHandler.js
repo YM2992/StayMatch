@@ -5,7 +5,7 @@ let userHandler = {};
 userHandler.authenticateUser = async function(email, password) {
     const query = `
         SELECT * 
-        FROM User 
+        FROM [dbo].[User] 
         WHERE Email = @email AND Password = @password
     `;
     const params = [
@@ -15,7 +15,7 @@ userHandler.authenticateUser = async function(email, password) {
 
     try {
         const result = await executeQuery(query, params);
-        return result.recordset.length > 0 ? result.recordset[0] : null;
+        return result ? result[0].User_ID : null;
     } catch (err) {
         console.error('Error authenticating user:', err);
         throw err;
@@ -26,23 +26,22 @@ userHandler.authenticateUser = async function(email, password) {
 userHandler.registerUser = async function(user) {
     console.log('Registering user:', user);
     
-    const { email, password, first_name, last_name } = user;
+    const { email, password, name } = user;
     const query = `
         INSERT INTO [dbo].[User]
-        ([email], [password], [first_name], [last_name])
-        VALUES (@email, @password, @first_name, @last_name); 
+        ([email], [password], [name])
+        VALUES (@email, @password, @name); 
         SELECT SCOPE_IDENTITY() AS User_ID;
     `;
     const params = [
         { name: 'email', type: 'varchar', value: email },
         { name: 'password', type: 'varchar', value: password },
-        { name: 'first_name', type: 'varchar', value: first_name },
-        { name: 'last_name', type: 'varchar', value: last_name }
+        { name: 'name', type: 'varchar', value: name }
     ];
 
     try {
         const result = await executeQuery(query, params);
-        return result[0].User_ID;
+        return result ? result[0].User_ID : null;
     } catch (err) {
         console.error('Error registering user:', err);
         throw err;
@@ -51,7 +50,7 @@ userHandler.registerUser = async function(user) {
 
 // Update user
 userHandler.updateUser = async function(User_ID, updatedFields) {
-    const { email, password, first_name, last_name } = updatedFields;
+    const { email, password, name } = updatedFields;
     const updates = [];
     const params = [{ name: 'User_ID', type: 'Int', value: User_ID }];
 
@@ -63,17 +62,13 @@ userHandler.updateUser = async function(User_ID, updatedFields) {
         updates.push('Password = @password');
         params.push({ name: 'password', type: 'varchar', value: password });
     }
-    if (first_name) {
-        updates.push('First_Name = @first_name');
-        params.push({ name: 'first_name', type: 'varchar', value: first_name });
-    }
-    if (last_name) {
-        updates.push('Last_Name = @last_name');
-        params.push({ name: 'last_name', type: 'varchar', value: last_name });
+    if (name) {
+        updates.push('Name = @name');
+        params.push({ name: 'name', type: 'varchar', value: name });
     }
 
     const query = `
-        UPDATE User
+        UPDATE [dbo].[User]
         SET ${updates.join(', ')}, UpdatedAt = GETDATE()
         WHERE User_ID = @User_ID;
     `;

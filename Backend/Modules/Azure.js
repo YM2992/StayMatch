@@ -49,7 +49,7 @@ Azure.connectToSQL = async function () {
 Azure.getFromTable = async function (tableName, columns = '*', whereClause = '') {
     try {
         const query = `SELECT ${columns} FROM ${tableName} ${whereClause}`;
-        const result = await executeQuery(query);
+        const result = await this.executeQuery(query);
         return result;
     } catch (error) {
         console.error('Error fetching data from table:', error);
@@ -60,7 +60,10 @@ Azure.getFromTable = async function (tableName, columns = '*', whereClause = '')
 Azure.insertIntoTable = async function (tableName, columns, values) {
     try {
         const query = `INSERT INTO ${tableName} (${columns}) VALUES (${values})`;
-        const result = await executeQuery(query);
+        console.log(`Executing query: ${query}`);
+
+        if (true) return;
+        const result = await this.executeQuery(query);
         return result;
     } catch (error) {
         console.error('Error inserting data into table:', error);
