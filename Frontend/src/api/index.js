@@ -1,11 +1,15 @@
 const API_URL = "http://localhost:8000/api";
 const paths = {
+    // User
     login: "user/login",
     register: "user/register",
     forgotPassword: "user/forgot-password",
     update: "user/update",
     delete: "user/delete",
-    getUser: "user/get"
+    getUser: "user/get",
+
+    // Hotels
+    getHotels: "hotels"
 }
 let functions = {}
 
