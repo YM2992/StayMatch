@@ -1,6 +1,7 @@
 # Local files
-Backend/data/*
-Backend/blobDataFiles/*
+Backend/data/extracted/*
+Backend/data/blob/*
+Backend/data/refined/*
 
 
 # Logs
