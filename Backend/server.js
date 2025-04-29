@@ -7,11 +7,11 @@ console.log(`Server starting: ${currentTime}`);
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-
+const path = require('path');
 const app = express();
-app.use(cors({ origin: '*' }));
 
 // Middleware for parsing request bodies
+app.use(cors({ origin: '*' }));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -19,6 +19,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 const TripAdvisorAPI = require('./Modules/TripAdvisor');
 const Azure = require('./Modules/Azure');
 const Util = require('./Modules/Util');
+const hotelHandler = require('./Handlers/hotelHandler');
 const downloadKaggleData = require('./Modules/fetchKaggleData');
 const refineCSV = require('./Modules/refineCSV');
 
@@ -111,11 +112,8 @@ async function main() {
     });
     
     // Refine the data
-
-    const path = require('path');
-
-    const inputDir = path.join(__dirname, 'blobDataFiles');
-    const outputDir = path.join(__dirname, 'RefinedDataFiles');
+    const inputDir = blobDir;
+    const outputDir = refinedDir;
 
     (async () => {
         try {
@@ -132,8 +130,111 @@ async function main() {
     })();
     
     
+    // Insert dummy data into the Azure SQL database
+    // const dummyData = [
+    //     {
+    //         name: 'الوادي للوحدات السكنية',
+    //         location: 'Riyadh Al Khabra Show on map',
+    //         price: 200,
+    //         beds: '2 single beds',
+    //         room_type: 'Deluxe Twin Room',
+    //         rating: 8.5
+    //     },
+    //     {
+    //         name: 'فندق سوار',
+    //         location: 'Sīdī Ḩamzah Show on map',
+    //         price: 145,
+    //         beds: '2 single beds',
+    //         room_type: 'Small Twin Room',
+    //         rating: 8.6
+    //     },
+    //     {
+    //         name: 'Golden Dakhil',
+    //         location: 'Qabāʼ Show on map',
+    //         price: 100,
+    //         beds: '1 extra-large double bed',
+    //         room_type: 'Economy Double Room',
+    //         rating: 7.3
+    //     }
+    // ];
+
+    // try {
+    //     const columns = ['name', 'location', 'price', 'beds', 'room_type', 'rating'];
+    //     await hotelHandler.insertHotels(dummyData);
+    //     console.log('Dummy data inserted successfully:', dummyData);
+    // } catch (err) {
+    //     console.error('Error inserting dummy data:', err);
+    // }
     
-    // Load the data to the SQL database
+    // Load the data from refinedFiles to the SQL database
+    const refinedFiles = fs.readdirSync(refinedDir).filter(file => file.endsWith('.csv'));
+    for (const file of refinedFiles) {
+        const filePath = `${refinedDir}/${file}`;
+        const csvData = fs.readFileSync(filePath, 'utf8');
+        const rows = csvData.split('\n').filter(row => row.trim() !== '');
+        const headers = rows[0].split(',').map(header => header.replace(/"/g, ''));
+
+        const entries = rows.slice(1).map(row => {
+            const values = row.split(',').map(value => value.replace(/"/g, ''));
+            return headers.reduce((obj, header, index) => {
+                obj[header.trim()] = values[index]?.trim();
+                return obj;
+            }, {});
+        }).filter(entry => !Object.values(entry).some(value => value === null || value === undefined || value === ''));
+
+        // Apply development/testing limit of 20 entries
+        const limitedEntries = entries.slice(0, 20);
+
+        if (limitedEntries.length > 0) {
+            for (const entry of limitedEntries) {
+                try {
+                    // Check if the hotel already exists by name
+                    const query = `SELECT * FROM Hotel WHERE name = @name`;
+                    const params = [{ name: 'name', type: 'NVarChar', value: entry.name }];
+                    const existingHotel = await Azure.executeQuery(query, params);
+
+                    if (existingHotel.length > 0) {
+                        // Update the existing hotel
+                        const updateQuery = `
+                            UPDATE Hotels
+                            SET location = @location, price = @price, beds = @beds, room_type = @room_type, rating = @rating
+                            WHERE name = @name
+                        `;
+                        const updateParams = [
+                            { name: 'location', type: 'NVarChar', value: entry.location },
+                            { name: 'price', type: 'Float', value: entry.price },
+                            { name: 'beds', type: 'NVarChar', value: entry.beds },
+                            { name: 'room_type', type: 'NVarChar', value: entry.room_type },
+                            { name: 'rating', type: 'Float', value: entry.rating },
+                            { name: 'name', type: 'NVarChar', value: entry.name }
+                        ];
+                        await Azure.executeQuery(updateQuery, updateParams);
+                        console.log(`Updated hotel: ${entry.name}`);
+                    } else {
+                        // Insert as a new hotel
+                        const insertQuery = `
+                            INSERT INTO Hotel (name, location, price, beds, room_type, rating)
+                            VALUES (@name, @location, @price, @beds, @room_type, @rating)
+                        `;
+                        const insertParams = [
+                            { name: 'name', type: 'NVarChar', value: entry.name },
+                            { name: 'location', type: 'NVarChar', value: entry.location },
+                            { name: 'price', type: 'Float', value: entry.price },
+                            { name: 'beds', type: 'NVarChar', value: entry.beds },
+                            { name: 'room_type', type: 'NVarChar', value: entry.room_type },
+                            { name: 'rating', type: 'Float', value: entry.rating }
+                        ];
+                        await Azure.executeQuery(insertQuery, insertParams);
+                        console.log(`Inserted new hotel: ${entry.name}`);
+                    }
+                } catch (err) {
+                    console.error(`Error processing entry for ${entry.name}:`, err);
+                }
+            }
+        } else {
+            console.warn(`No valid entries to process from ${file}`);
+        }
+    }
 }
 
 main().catch(err => {
