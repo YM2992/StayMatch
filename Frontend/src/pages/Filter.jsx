@@ -83,15 +83,15 @@ export default function Filter() {
             Choose your Hotel
           </h1>
           <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
-          <Link to="/profile">
-            <div className="w-10 h-10 bg-gray-300 rounded-full overflow-hidden">
-              <img
-                src={profileIcon}
-                alt="Profile"
-                className="w-full h-full object-cover"
-              />
-            </div>
-          </Link>
+            <Link to="/profile">
+              <div className="w-10 h-10 bg-gray-300 rounded-full overflow-hidden">
+                <img
+                  src={profileIcon}
+                  alt="Profile"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            </Link>
           </div>
         </div>
 
