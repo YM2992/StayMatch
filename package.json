@@ -2,7 +2,6 @@
   "name": "staymatch",
   "version": "1.0.0",
   "description": "A hotel and accommodation finder.",
-  "type": "module",
   "private": true,
   "scripts": {
     "backend": "nodemon backend/server.js",
