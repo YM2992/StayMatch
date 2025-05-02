@@ -15,46 +15,43 @@ const alphaRegex   = /^[A-Za-z\s]+$/;
 
 (async () => {
   try {
-    // === Define paths under backend/data ===
-    const projectRoot = path.resolve(__dirname, '..');       // points to backend/
-    const inputDir    = path.join(projectRoot, 'data', 'blob');
-    const outputDir   = path.join(projectRoot, 'data', 'refined');
+    // Define paths under backend/data
+    const projectRoot = path.resolve(__dirname, '..');
+    const blobDir    = path.join(projectRoot, 'data', 'blob');
+    const refinedDir = path.join(projectRoot, 'data', 'refined');
+    const finalDir   = path.join(projectRoot, 'data', 'finaldata');
 
-    if (!fs.existsSync(outputDir)) {
-      fs.mkdirSync(outputDir, { recursive: true });
-      console.log(`Created output directory: ${outputDir}`);
-    }
+    // Ensure directories exist
+    [refinedDir, finalDir].forEach(dir => {
+      if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    });
 
-    const files = fs.readdirSync(inputDir).filter(f => f.endsWith('.csv'));
-    if (files.length === 0) {
+    // STAGE 1: Refine each CSV in blob
+    const sourceFiles = fs.readdirSync(blobDir).filter(f => f.endsWith('.csv'));
+    if (sourceFiles.length === 0) {
       console.log('⚠️ No CSV files found in blob folder to refine.');
       return;
     }
 
-    for (const file of files) {
-      console.log(`🔄 Processing ${file}...`);
-      const inputPath = path.join(inputDir, file);
+    for (const file of sourceFiles) {
+      console.log(`🔄 Refining ${file}...`);
+      const inputPath = path.join(blobDir, file);
       const rows      = [];
       let nameKey, locationKey, priceKey, ratingKey;
       let breakfastKey, freeCancelKey, noPrepaymentKey;
 
-      // Read & parse
       await new Promise((resolve, reject) => {
         fs.createReadStream(inputPath)
           .pipe(csvParser())
           .on('headers', headers => {
-            const findKey = syns =>
-              headers.find(h => syns.some(s => h.toLowerCase().includes(s)));
-
+            const findKey = syns => headers.find(h => syns.some(s => h.toLowerCase().includes(s)));
             nameKey     = findKey(nameSynonyms);
             locationKey = findKey(locationSynonyms);
             priceKey    = findKey(priceSynonyms);
             ratingKey   = findKey(ratingSynonyms);
-
             breakfastKey    = headers.find(h => h.toLowerCase().includes('breakfast'));
             freeCancelKey   = headers.find(h => h.toLowerCase().includes('free cancellation'));
             noPrepaymentKey = headers.find(h => h.toLowerCase().includes('no prepayment'));
-
             if (!nameKey) reject(new Error(`No "name" column in ${file}`));
           })
           .on('data', row => {
@@ -62,9 +59,9 @@ const alphaRegex   = /^[A-Za-z\s]+$/;
             if (!rawName || !englishRegex.test(rawName) || !alphaRegex.test(rawName)) return;
 
             // Base columns
-            const Name       = rawName;
-            const rawLoc     = row[locationKey]?.trim() || '';
-            const Location  = englishRegex.test(rawLoc)
+            const Name   = rawName;
+            const rawLoc = row[locationKey]?.trim() || '';
+            const Location = englishRegex.test(rawLoc)
               ? rawLoc.replace(/show on map|show/gi, '').trim()
               : '';
 
@@ -72,8 +69,7 @@ const alphaRegex   = /^[A-Za-z\s]+$/;
             const rawPrice   = row[priceKey]?.trim() || '';
             const priceMatch = rawPrice.match(/\d+(?:\.\d+)?/);
             const basePrice  = priceMatch ? parseFloat(priceMatch[0]) : 0;
-            const converted  = parseFloat((basePrice * 2.39).toFixed(2));
-            const Price      = converted;
+            const Price      = parseFloat((basePrice * 2.39).toFixed(2));
             const Currency   = 'SAR';
 
             // Rating: extract first number, one decimal place
@@ -82,7 +78,7 @@ const alphaRegex   = /^[A-Za-z\s]+$/;
             const parsedRating = ratingMatch ? parseFloat(ratingMatch[0]) : 5.0;
             const Rating       = parsedRating.toFixed(1);
 
-            // Extras (default if missing)
+            // Extras with defaults
             const RoomType          = row['Room Type']?.trim() || 'N/A';
             const BedInfo           = row['Bed Info']?.trim()  || 'N/A';
             const BreakfastIncluded = breakfastKey && row[breakfastKey].toString().toUpperCase()==='YES' ? 'YES' : 'NO';
@@ -106,12 +102,12 @@ const alphaRegex   = /^[A-Za-z\s]+$/;
           .on('error', reject);
       });
 
-      if (!rows.length) {
-        console.log(`⚠️ No valid rows in ${file}, skipping.`);
+      if (rows.length === 0) {
+        console.log(`⚠️ No valid rows in ${file}, skipped.`);
         continue;
       }
 
-      // Write out
+      // Write refined file
       const fields = [
         'Name','Location','Price','Currency','Rating',
         'Room Type','Bed Info','Breakfast included',
@@ -119,15 +115,41 @@ const alphaRegex   = /^[A-Za-z\s]+$/;
       ];
       const csvOutput = parse(rows, { fields });
       const outName   = `R_${file}`;
-      const outPath   = path.join(outputDir, outName);
-
+      const outPath   = path.join(refinedDir, outName);
       fs.writeFileSync(outPath, csvOutput);
       console.log(`✅ Refined CSV saved: ${outPath}`);
     }
 
-    console.log('🎉 All files refined to backend/data/refined!');
+    console.log('🎉 Stage 1 complete: All files refined to refined folder.');
+
+    // STAGE 2: Merge all refined CSVs
+    const refinedFiles = fs.readdirSync(refinedDir).filter(f => f.endsWith('.csv'));
+    const mergedRows   = [];
+
+    for (const file of refinedFiles) {
+      const filePath = path.join(refinedDir, file);
+      await new Promise((resolve, reject) => {
+        fs.createReadStream(filePath)
+          .pipe(csvParser())
+          .on('data', row => mergedRows.push(row))
+          .on('end', resolve)
+          .on('error', reject);
+      });
+    }
+
+    if (mergedRows.length > 0) {
+      const mergeFields = Object.keys(mergedRows[0]);
+      const mergedCsv   = parse(mergedRows, { fields: mergeFields });
+      const mergedPath  = path.join(finalDir, 'merged_finaldata.csv');
+      fs.writeFileSync(mergedPath, mergedCsv);
+      console.log(`✅ Merged CSV saved: ${mergedPath}`);
+    } else {
+      console.log('⚠️ No refined files to merge into finaldata.');
+    }
+
+    console.log('🎉 Stage 2 complete: merged_finaldata.csv created in finaldata folder.');
   }
   catch (err) {
-    console.error('🛑 Refinement error:', err.message);
+    console.error('🛑 Error in refineCSV.js:', err.message);
   }
 })();

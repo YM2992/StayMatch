@@ -63,7 +63,7 @@ if (!fs.existsSync(refinedDir)) {
     console.log(`Created directory: ${refinedDir}`);
 }
 
-// ─── NEW: helper to run your Python scraper ────────────────────────────────
+// Python scraper 
 function runBookingScraper() {
     return new Promise((resolve, reject) => {
       // compute the absolute path to booking_scraper.py
@@ -151,6 +151,15 @@ async function main() {
             console.error('Error listing blobs:', err);
         });
     }
+
+    // call the Python booking scraper 
+    console.log('🚀 Launching booking_scraper.py …');
+    try {
+      await runBookingScraper();
+    } catch (err) {
+      console.error('🛑 booking scraper failed:', err);
+    }
+    //
         
     // REFINE: Refine/transform the data
     const inputDir = AZURE_ENABLED ? blobDir : extractedDir;
@@ -170,14 +179,6 @@ async function main() {
         }
     })();
     
-        // call the Python booking scraper 
-        console.log('🚀 Launching booking_scraper.py …');
-        try {
-          await runBookingScraper();
-        } catch (err) {
-          console.error('🛑 booking scraper failed:', err);
-        }
-        //
     
     
     // LOAD: Load the data to the SQL database
