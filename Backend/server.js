@@ -1,4 +1,5 @@
 require('dotenv').config();
+const { spawn } = require('child_process');
 const currentTime = new Date();
 console.log(`Server starting: ${currentTime}`);
 
@@ -62,6 +63,34 @@ if (!fs.existsSync(refinedDir)) {
     console.log(`Created directory: ${refinedDir}`);
 }
 
+// Python scraper 
+function runBookingScraper() {
+    return new Promise((resolve, reject) => {
+      // compute the absolute path to booking_scraper.py
+      const scriptPath = path.join(__dirname, 'Modules', 'booking_scraper.py');
+  
+      const scraper = spawn(
+        'python', 
+        [ scriptPath ], 
+        { stdio: 'inherit' }
+      );
+  
+      scraper.on('error', err => {
+        console.error('Failed to start booking_scraper.py:', err);
+        reject(err);
+      });
+  
+      scraper.on('close', code => {
+        if (code === 0) {
+          console.log('✅ booking_scraper.py finished successfully');
+          resolve();
+        } else {
+          reject(new Error(`booking_scraper.py exited with code ${code}`));
+        }
+      });
+    });
+  }
+  // ────────────────────────────────────────────────────────────────────────────
 
 async function main() {
     // Check if Azure is enabled
@@ -120,6 +149,15 @@ async function main() {
             console.error('Error listing blobs:', err);
         });
     }
+
+    // call the Python booking scraper 
+    console.log('🚀 Launching booking_scraper.py …');
+    try {
+      await runBookingScraper();
+    } catch (err) {
+      console.error('🛑 booking scraper failed:', err);
+    }
+    //
         
     // REFINE: Refine/transform the data
     const inputDir = AZURE_ENABLED ? blobDir : extractedDir;
