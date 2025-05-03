@@ -7,8 +7,13 @@ A hotel and accommodation finder.
 
 
 ## Installing
+Install npm packages
 ```
 npm install .
+```
+Install Python packages
+```
+pip install -r requirements.txt
 ```
 
 ## Running
