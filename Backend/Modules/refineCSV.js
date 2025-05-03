@@ -14,7 +14,7 @@ const ratingSynonyms   = ['rating', 'review', 'score'];
 const englishRegex = /^[\x00-\x7F]+$/;
 const alphaRegex   = /^[A-Za-z\s]+$/;
 
-(async () => {
+module.exports = async function refineCSV() {
   try {
     // Define paths under backend/data
     const projectRoot = path.resolve(__dirname, '..');
@@ -153,4 +153,4 @@ const alphaRegex   = /^[A-Za-z\s]+$/;
   catch (err) {
     console.error('🛑 Error in refineCSV.js:', err.message);
   }
-})();
+};

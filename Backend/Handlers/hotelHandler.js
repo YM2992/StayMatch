@@ -79,7 +79,7 @@ hotelHandler.getHotels = async function(filters) {
 
     try {
         const result = await executeQuery(query, params);
-        return result.recordset;
+        return result;
     } catch (err) {
         console.error('Error fetching hotels:', err);
         throw err;
