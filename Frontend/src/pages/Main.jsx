@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CalendarIcon, SearchIcon } from "lucide-react";
+import { SearchIcon } from "lucide-react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import jeddahImg from "../assets/jeddah.jpg";
@@ -16,6 +16,48 @@ function Main() {
   const [children, setChildren] = useState(0);
   const [rooms, setRooms] = useState(1);
   const [searchResults, setSearchResults] = useState([]);
+
+  const isFormComplete = destination && checkIn && checkOut;
+
+  const handleSearch = () => {
+    if (!isFormComplete) return;
+
+    // Replace this with real API call
+    const mockResults = [
+      {
+        id: 1,
+        name: "Taiwan Seven Days Boutique Hotel",
+        location: "Wanhua District, Taipei",
+        rating: 7.4,
+        ratingText: "Good",
+        reviews: 528,
+        price: 3002,
+        originalPrice: 6982,
+        nights: `${Math.ceil(
+          (checkOut - checkIn) / (1000 * 60 * 60 * 24)
+        )} nights, ${adults} adults`,
+        image:
+          "https://cf.bstatic.com/xdata/images/hotel/square600/53425499.jpg",
+      },
+      {
+        id: 2,
+        name: "Sundaily Hostel 北車",
+        location: "Zhongzheng District, Taipei",
+        rating: 9.0,
+        ratingText: "Superb",
+        reviews: 1287,
+        price: 1766,
+        originalPrice: null,
+        nights: `${Math.ceil(
+          (checkOut - checkIn) / (1000 * 60 * 60 * 24)
+        )} nights, ${adults} adults`,
+        image:
+          "https://cf.bstatic.com/xdata/images/hotel/square600/332366810.jpg",
+      },
+    ];
+
+    setSearchResults(mockResults);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#3a506b] to-[#1c1c2b] flex items-center justify-center p-[5%]">
@@ -94,65 +136,17 @@ function Main() {
             </div>
 
             <button
-              className="col-span-1 md:col-span-auto bg-[#b0cde5] hover:bg-[#99bbdb] text-white px-4 py-2 rounded-full flex items-center justify-center transition-transform hover:scale-105"
-              onClick={() => {
-                const mockResults = [
-                  {
-                    id: 1,
-                    name: "Taiwan Seven Days Boutique Hotel",
-                    location: "Wanhua District, Taipei",
-                    rating: 7.4,
-                    ratingText: "Good",
-                    reviews: 528,
-                    price: 3002,
-                    originalPrice: 6982,
-                    nights: "36 nights, 2 adults",
-                    image: "",
-                  },
-                  {
-                    id: 2,
-                    name: "Sundaily Hostel 北車",
-                    location: "Zhongzheng District, Taipei",
-                    rating: 9.0,
-                    ratingText: "Superb",
-                    reviews: 1287,
-                    price: 1766,
-                    originalPrice: null,
-                    nights: "36 nights, 2 adults",
-                    image: "",
-                  },
-                ];
-                setSearchResults(mockResults);
-              }}
+              className={`col-span-1 md:col-span-auto px-4 py-2 rounded-full flex items-center justify-center transition-transform ${
+                isFormComplete
+                  ? "bg-[#b0cde5] hover:bg-[#99bbdb] text-white hover:scale-105"
+                  : "bg-gray-400 text-white cursor-not-allowed"
+              }`}
+              onClick={handleSearch}
+              disabled={!isFormComplete}
             >
-              <SearchIcon className="mr-2 h-4 w-4" /> Search
+              <SearchIcon className="mr-2 h-4 w-4" />
+              Search
             </button>
-          </div>
-
-          {/* Offers */}
-          <div className="mt-10">
-            <h3 className="text-xl font-semibold text-[#1c1c2b] mb-4">
-              Offers
-            </h3>
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="bg-white text-[#1c1c2b] rounded-lg p-4 shadow">
-                <h4 className="font-bold mb-2">Quick escape, quality time</h4>
-                <p className="mb-2">Save up to 20% with a Getaway Deal</p>
-                <button className="bg-[#b0cde5] hover:bg-[#99bbdb] text-white px-4 py-2 rounded-full">
-                  Save on stays
-                </button>
-              </div>
-              <div className="bg-[#3a506b] text-white rounded-lg p-4 shadow">
-                <h4 className="font-bold mb-2">Genius flight price alerts</h4>
-                <p className="mb-4">
-                  Save on flights with price alerts in your pocket. Set up an
-                  alert and get notified when prices drop.
-                </p>
-                <button className="border border-white px-4 py-2 rounded-full hover:bg-[#99bbdb] transition">
-                  Get the app
-                </button>
-              </div>
-            </div>
           </div>
 
           {/* Recommended Stays */}
