@@ -1,6 +1,5 @@
 # Local files
-Backend/data/*
-Backend/blobDataFiles/*
+Backend/data/**
 
 
 # Logs
