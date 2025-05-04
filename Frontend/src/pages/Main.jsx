@@ -2,6 +2,11 @@ import { useState } from "react";
 import { CalendarIcon, SearchIcon } from "lucide-react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import jeddahImg from "../assets/jeddah.jpg";
+import meccaImg from "../assets/mecca.webp";
+import medinaImg from "../assets/medina.jpg";
+import riyadhImg from "../assets/riyadh.jpg";
+import taifImg from "../assets/taif.jpg";
 
 function Main() {
   const [destination, setDestination] = useState("");
@@ -12,14 +17,17 @@ function Main() {
   const [rooms, setRooms] = useState(1);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#3a506b] to-[#1c1c2b] flex items-center justify-center px-4">
+    <div className="min-h-screen bg-gradient-to-br from-[#3a506b] to-[#1c1c2b] flex items-center justify-center p-[5%]">
       <div className="bg-gray-100 p-8 rounded-xl shadow-md w-full">
         <header className="mb-8 flex justify-between items-center">
+          {/* Title */}
           <h1 className="text-2xl font-bold text-[#1c1c2b]">StayMatch</h1>
           <div className="space-x-4">
+            {/* Register */}
             <button className="border border-white text-white px-4 py-2 rounded-md hover:bg-blue-100">
               Register
             </button>
+            {/* Sign In */}
             <button className="border border-white text-white px-4 py-2 rounded-md hover:bg-blue-100">
               Sign in
             </button>
@@ -35,6 +43,7 @@ function Main() {
           </p>
 
           <div className="bg-white text-black rounded-xl shadow p-4 grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
+            {/* Destination */}
             <div className="text-sm font-medium mb-1 text-black">
               Destination
               <input
@@ -46,6 +55,7 @@ function Main() {
               />
             </div>
 
+            {/* Check In */}
             <div className="text-sm font-medium mb-1 text-black flex flex-col">
               Check In Date
               <DatePicker
@@ -57,6 +67,7 @@ function Main() {
               />
             </div>
 
+            {/* Check Out */}
             <div className="text-sm font-medium mb-1 text-black flex flex-col">
               Check Out Date
               <DatePicker
@@ -69,6 +80,7 @@ function Main() {
               />
             </div>
 
+            {/* Guests & Rooms */}
             <div className="text-sm font-medium mb-1 text-black">
               Guests & Rooms
               <select
@@ -87,11 +99,13 @@ function Main() {
               </select>
             </div>
 
+            {/* Search Button */}
             <button className="col-span-1 md:col-span-auto bg-[#b0cde5] hover:bg-[#99bbdb] text-white px-4 py-2 rounded-full flex items-center justify-center transition-transform hover:scale-105">
               <SearchIcon className="mr-2 h-4 w-4" /> Search
             </button>
           </div>
 
+          {/* Offers */}
           <div className="mt-10">
             <h3 className="text-xl font-semibold text-[#1c1c2b] mb-4">
               Offers
@@ -114,6 +128,43 @@ function Main() {
                   Get the app
                 </button>
               </div>
+            </div>
+          </div>
+
+          {/* Trending Locations */}
+          <div className="mt-12">
+            <h3 className="text-2xl font-semibold text-black mb-1">
+              Trending destinations
+            </h3>
+            <p className="text-md text-gray-500 mb-6">
+              Most popular choices for travellers from Saudi Arabia
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[
+                { city: "Jeddah", country: "Saudi Arabia", img: jeddahImg },
+                { city: "Mecca", country: "Saudi Arabia", img: meccaImg },
+                { city: "Medina", country: "Saudi Arabia", img: medinaImg },
+                { city: "Riyadh", country: "Saudi Arabia", img: riyadhImg },
+                { city: "Taif", country: "Saudi Arabia", img: taifImg },
+              ].map(({ city, country, img }, i) => (
+                <div
+                  key={i}
+                  className={`relative rounded-xl overflow-hidden shadow-lg border-2 ${
+                    i === 0 ? "border-yellow-400" : "border-transparent"
+                  } hover:scale-[1.02] transition-transform`}
+                >
+                  <img
+                    src={img}
+                    alt={city}
+                    className="w-full h-48 object-cover"
+                  />
+                  <div className="absolute bottom-0 left-0 p-4 bg-gradient-to-t from-black/80 to-transparent w-full">
+                    <h4 className="text-lg font-bold text-white">{city}</h4>
+                    <p className="text-sm text-white">{country}</p>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </main>
