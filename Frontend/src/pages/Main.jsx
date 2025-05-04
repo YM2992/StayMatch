@@ -22,7 +22,6 @@ function Main() {
   const handleSearch = () => {
     if (!isFormComplete) return;
 
-    // Replace this with real API call
     const mockResults = [
       {
         id: 1,
