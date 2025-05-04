@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { CalendarIcon, SearchIcon } from "lucide-react";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 function Main() {
   const [destination, setDestination] = useState("");
-  const [checkIn, setCheckIn] = useState("");
-  const [checkOut, setCheckOut] = useState("");
+  const [checkIn, setCheckIn] = useState(null);
+  const [checkOut, setCheckOut] = useState(null);
   const [adults, setAdults] = useState(2);
   const [children, setChildren] = useState(0);
   const [rooms, setRooms] = useState(1);
@@ -43,24 +45,30 @@ function Main() {
                 className="border px-3 py-2 rounded-md w-full"
               />
             </div>
-            <div className="text-sm font-medium mb-1 text-black">
+
+            <div className="text-sm font-medium mb-1 text-black flex flex-col">
               Check In Date
-              <input
-                type="date"
-                value={checkIn}
-                onChange={(e) => setCheckIn(e.target.value)}
+              <DatePicker
+                selected={checkIn}
+                onChange={(date) => setCheckIn(date)}
                 className="border px-3 py-2 rounded-md w-full"
+                placeholderText="Select check-in"
+                dateFormat="yyyy-MM-dd"
               />
             </div>
-            <div className="text-sm font-medium mb-1 text-black">
+
+            <div className="text-sm font-medium mb-1 text-black flex flex-col">
               Check Out Date
-              <input
-                type="date"
-                value={checkOut}
-                onChange={(e) => setCheckOut(e.target.value)}
+              <DatePicker
+                selected={checkOut}
+                onChange={(date) => setCheckOut(date)}
                 className="border px-3 py-2 rounded-md w-full"
+                placeholderText="Select check-out"
+                dateFormat="yyyy-MM-dd"
+                minDate={checkIn}
               />
             </div>
+
             <div className="text-sm font-medium mb-1 text-black">
               Guests & Rooms
               <select
@@ -78,7 +86,8 @@ function Main() {
                 <option value="2,2,2">2 adults · 2 children · 2 rooms</option>
               </select>
             </div>
-            <button className=" col-span-1 md:col-span-auto bg-[#b0cde5] hover:bg-[#99bbdb] text-white px-4 py-2 rounded-full flex items-center justify-center transition-transform hover:scale-105">
+
+            <button className="col-span-1 md:col-span-auto bg-[#b0cde5] hover:bg-[#99bbdb] text-white px-4 py-2 rounded-full flex items-center justify-center transition-transform hover:scale-105">
               <SearchIcon className="mr-2 h-4 w-4" /> Search
             </button>
           </div>
