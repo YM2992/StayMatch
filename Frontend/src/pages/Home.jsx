@@ -4,7 +4,6 @@ import logo from "../assets/logo.png";
 import { Link } from "react-router-dom";
 import api from "../api";
 
-
 function Home() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -36,11 +35,11 @@ function Home() {
   const handleSubmit = async () => {
     if (validate()) {
       console.log("Logging in with:", email, password);
-      
+
       const data = {
         email: email,
         password: password,
-      }
+      };
 
       const response = await api.httpPost(api.paths.login, data);
 
