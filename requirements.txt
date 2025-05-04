@@ -4,3 +4,4 @@ beautifulsoup4
 pandas
 keyboard
 kaggle
+numpy>=1.22.4
