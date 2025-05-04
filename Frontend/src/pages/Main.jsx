@@ -32,30 +32,39 @@ function Main() {
             Search low prices on hotels, homes and much more...
           </p>
 
-          <div className="bg-white rounded-xl shadow p-4 grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
-            <input
-              type="text"
-              placeholder="Where are you going?"
-              value={destination}
-              onChange={(e) => setDestination(e.target.value)}
-              className="border px-3 py-2 rounded-md w-full"
-            />
-            <input
-              type="date"
-              value={checkIn}
-              onChange={(e) => setCheckIn(e.target.value)}
-              className="border px-3 py-2 rounded-md w-full"
-            />
-            <input
-              type="date"
-              value={checkOut}
-              onChange={(e) => setCheckOut(e.target.value)}
-              className="border px-3 py-2 rounded-md w-full"
-            />
-            <div className="flex flex-col">
-              <label className="text-sm font-medium mb-1">Guests & Rooms</label>
+          <div className="bg-white text-black rounded-xl shadow p-4 grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
+            <div className="text-sm font-medium mb-1 text-black">
+              Destination
+              <input
+                type="text"
+                placeholder="Where are you going?"
+                value={destination}
+                onChange={(e) => setDestination(e.target.value)}
+                className="border px-3 py-2 rounded-md w-full"
+              />
+            </div>
+            <div className="text-sm font-medium mb-1 text-black">
+              Check In Date
+              <input
+                type="date"
+                value={checkIn}
+                onChange={(e) => setCheckIn(e.target.value)}
+                className="border px-3 py-2 rounded-md w-full"
+              />
+            </div>
+            <div className="text-sm font-medium mb-1 text-black">
+              Check Out Date
+              <input
+                type="date"
+                value={checkOut}
+                onChange={(e) => setCheckOut(e.target.value)}
+                className="border px-3 py-2 rounded-md w-full"
+              />
+            </div>
+            <div className="text-sm font-medium mb-1 text-black">
+              Guests & Rooms
               <select
-                className="border rounded px-3 py-2"
+                className="border rounded px-3 py-2 w-full"
                 value={`${adults},${children},${rooms}`}
                 onChange={(e) => {
                   const [a, c, r] = e.target.value.split(",").map(Number);
@@ -69,7 +78,7 @@ function Main() {
                 <option value="2,2,2">2 adults · 2 children · 2 rooms</option>
               </select>
             </div>
-            <button className="col-span-1 md:col-span-auto bg-[#b0cde5] hover:bg-[#99bbdb] text-white px-4 py-2 rounded-full flex items-center justify-center transition-transform hover:scale-105">
+            <button className=" col-span-1 md:col-span-auto bg-[#b0cde5] hover:bg-[#99bbdb] text-white px-4 py-2 rounded-full flex items-center justify-center transition-transform hover:scale-105">
               <SearchIcon className="mr-2 h-4 w-4" /> Search
             </button>
           </div>
