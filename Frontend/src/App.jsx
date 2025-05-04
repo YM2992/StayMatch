@@ -6,6 +6,7 @@ import Registration from "./pages/Registration";
 import Filter from "./pages/Filter";
 import Profile from "./pages/Profile";
 import ForgotPassword from "./pages/ForgotPassword";
+import Main from "./pages/Main";
 
 function App() {
   return (

@@ -15,9 +15,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@tailwindcss/vite": "^4.0.17",
     "@azure/identity": "^4.8.0",
     "@azure/storage-blob": "^12.27.0",
+    "@tailwindcss/vite": "^4.0.17",
     "axios": "^1.8.4",
     "cheerio": "^1.0.0",
     "cors": "^2.8.5",
@@ -27,6 +27,7 @@
     "hotels-scraper-js": "^0.1.0",
     "json-2-csv": "^5.5.9",
     "json2csv": "^6.0.0-alpha.2",
+    "lucide-react": "^0.507.0",
     "mssql": "^11.0.1",
     "puppeteer": "^24.6.1",
     "react": "^19.0.0",
