@@ -16,7 +16,7 @@ function Profile() {
 
                 {/* Home Button */}
                 <div className="flex justify-end">
-                    <Link to="/">
+                    <Link to="/filter">
                         <button className="icon-btn ml-2 p-1">
                             <img
                                 src={homeIcon}

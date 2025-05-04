@@ -1,13 +1,14 @@
 import Input from "../components/Input";
 import { useState } from "react";
 import logo from "../assets/logo.png";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import api from "../api";
-
 
 function Registration() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  const navigate = useNavigate();
 
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
@@ -74,8 +75,7 @@ function Registration() {
         alert("Registration failed: " + response.error);
       } else {
         alert("Registration successful!");
-        // Redirect to login page
-        window.location.href = "/";
+        navigate("/main");
       }
     }
   };
@@ -143,11 +143,21 @@ function Registration() {
               className="w-full h-10 px-3 py-2 border rounded-md shadow-sm bg-white text-gray-700"
             >
               <option value="">Select a question...</option>
-              <option value="What was your first pet's name?">What was your first pet's name?</option>
-              <option value="What is your mother's maiden name?">What is your mother's maiden name?</option>
-              <option value="What was the name of your primary school?">What was the name of your primary school?</option>
-              <option value="What is your favourite food?">What is your favourite food?</option>
-              <option value="In what city were you born?">In what city were you born?</option>
+              <option value="What was your first pet's name?">
+                What was your first pet's name?
+              </option>
+              <option value="What is your mother's maiden name?">
+                What is your mother's maiden name?
+              </option>
+              <option value="What was the name of your primary school?">
+                What was the name of your primary school?
+              </option>
+              <option value="What is your favourite food?">
+                What is your favourite food?
+              </option>
+              <option value="In what city were you born?">
+                In what city were you born?
+              </option>
             </select>
           </div>
 
@@ -157,7 +167,6 @@ function Registration() {
             value={securityAnswer}
             func={setSecurityAnswer}
           />
-          
         </div>
 
         <div className="flex justify-center mt-2">
