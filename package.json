@@ -15,9 +15,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@tailwindcss/vite": "^4.0.17",
     "@azure/identity": "^4.8.0",
     "@azure/storage-blob": "^12.27.0",
+    "@tailwindcss/vite": "^4.0.17",
     "axios": "^1.8.4",
     "cheerio": "^1.0.0",
     "cors": "^2.8.5",
