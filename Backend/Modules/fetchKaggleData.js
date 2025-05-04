@@ -2,79 +2,36 @@ const { exec } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
-const kaggleDatasets = [
-//   'ghidaqahtan/booking-hotels',
-//   'asafarji/saudi-arabia-bookingcom-2021',
-//   'aalaqeel/saudi-hotels-in-bookingcom',
-//   'moayadmagadmi/saudi-arabia-bookingcom',
-];
+// Replace with your target dataset and file
+const kaggleDataset = 'asafarji/saudi-arabia-bookingcom-2021'; // e.g. 'username/dataset-name'
+const datasetFile = 'winemag-data_first150k.csv'; // file inside the dataset
 
 const downloadKaggleData = () => {
-  const downloadPath = path.resolve(__dirname, '../data');
-
-  if (!fs.existsSync(downloadPath)) {
-    fs.mkdirSync(downloadPath, { recursive: true });
-  }
-
-  const downloadNext = (index) => {
-    if (index >= kaggleDatasets.length) return;
-
-    const dataset = kaggleDatasets[index];
-    const command = `kaggle datasets download -d ${dataset} -p ${downloadPath} --unzip --force`;
-
-    console.log(`\n📥 Starting download for: ${dataset}`);
-
-    // Spinner animation
-    const spinnerFrames = ['|', '/', '-', '\\'];
-    let spinnerIndex = 0;
-    const spinner = setInterval(() => {
-      process.stdout.write(`\r⏳ Downloading ${dataset} ${spinnerFrames[spinnerIndex++ % spinnerFrames.length]}`);
-    }, 100);
-
+    const command = `kaggle datasets download -d ${kaggleDataset} -p ./Backend/data/extracted --unzip --force`;
     exec(command, (error, stdout, stderr) => {
-      clearInterval(spinner);
-      process.stdout.write(`\r✅ Download complete for ${dataset}                      \n`);
-
-      if (error) {
-        console.error(`❌ Error downloading ${dataset}: ${error.message}`);
-        return downloadNext(index + 1); // Move to next dataset
-      }
-
-      if (stderr) {
-        console.warn(`⚠️ stderr: ${stderr}`);
-      }
-
-      console.log(`✅ Kaggle dataset downloaded:\n${stdout}`);
-
-      // Rename all CSV files to start with "fetched_"
-      fs.readdir(downloadPath, (err, files) => {
-        if (err) {
-          console.error('❌ Failed to read download directory:', err);
-          return downloadNext(index + 1);
+        if (error) {
+            console.error(`❌ Error downloading dataset: ${error.message}`);
+            return;
+        }
+        if (stderr) {
+            console.error(`⚠️ stderr: ${stderr}`);
+            return;
         }
 
-        files
-          .filter(f => f.endsWith('.csv'))
-          .forEach(file => {
-            const originalPath = path.join(downloadPath, file);
-            const newFileName = `fetched_${file}`;
-            const newPath = path.join(downloadPath, newFileName);
+        console.log(`✅ Kaggle dataset downloaded:\n${stdout}`);
 
-            if (!file.startsWith('fetched_')) {
-              fs.renameSync(originalPath, newPath);
-              console.log(`📦 Downloaded: ${file} → ${newFileName}`);
-            } else {
-              console.log(`ℹ️ File already prefixed: ${file}`);
-            }
-          });
-
-        // Proceed to next dataset
-        downloadNext(index + 1);
-      });
+        const filePath = path.join(__dirname, 'Backend/data/extracted', datasetFile);
+        if (fs.existsSync(filePath)) {
+            console.log(`✅ File saved locally at: ${filePath}`);
+        } else {
+            console.error('❌ File not found after download. Please check the dataset and filename.');
+        }
     });
-  };
+  }
 
-  downloadNext(0); // Start downloading first dataset
-};
+// Make sure data dir exists
+if (!fs.existsSync('./data')) {
+    fs.mkdirSync('./data');
+}
 
 module.exports = downloadKaggleData;
