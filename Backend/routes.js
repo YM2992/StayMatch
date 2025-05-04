@@ -91,19 +91,18 @@ const routes = [
         path: `${apiPath}/hotels`,
         method: 'get',
         handler: async (req, res) => {
-            const { branch_name, address, price, room_count, bed_count, amenities } = req.query;
+            const { name, location, price, beds, room_type, rating } = req.query;
+            console.log(req.query)
 
             try {
-                // Build a filter object based on provided query parameters
                 const filters = {};
-                if (branch_name) filters.branch_name = branch_name;
-                if (address) filters.address = address;
+                if (name) filters.name = name;
+                if (location) filters.location = location
                 if (price) filters.price = price;
-                if (room_count) filters.room_count = room_count;
-                if (bed_count) filters.bed_count = bed_count;
-                if (amenities) filters.amenities = amenities;
+                if (beds) filters.beds = beds;
+                if (room_type) filters.room_type = room_type;
+                if (rating) filters.rating = rating;
 
-                // Replace with actual logic to fetch hotels based on filters
                 const hotels = await hotelHandler.getHotels(filters);
 
                 return res.status(200).json({ hotels });

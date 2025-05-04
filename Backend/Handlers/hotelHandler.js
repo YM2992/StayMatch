@@ -37,43 +37,40 @@ hotelHandler.insertHotels = async function(hotelData) {
 }
 
 hotelHandler.getHotels = async function(filters) {
-    const { branch_name, address, price, room_count, bed_count, amenities } = filters;
+    const { name, location, price, beds, room_type, rating } = filters;
 
     // Build a filter object based on provided query parameters
     const filterConditions = [];
     const params = [];
 
-    if (branch_name) {
-        filterConditions.push('branch_name = @branch_name');
-        params.push({ name: 'branch_name', type: 'varchar', value: branch_name });
+    if (name) {
+        filterConditions.push('name LIKE @name');
+        params.push({ name: 'name', type: 'varchar', value: `%${name}%` });
     }
-    if (address) {
-        filterConditions.push('address = @address');
-        params.push({ name: 'address', type: 'varchar', value: address });
+    if (location) {
+        filterConditions.push('location LIKE @location');
+        params.push({ name: 'location', type: 'varchar', value: `%${location}%` });
     }
     if (price) {
         filterConditions.push('price <= @price');
         params.push({ name: 'price', type: 'int', value: price });
     }
-    if (room_count) {
-        filterConditions.push('room_count >= @room_count');
-        params.push({ name: 'room_count', type: 'int', value: room_count });
+    if (beds) {
+        filterConditions.push('beds >= @beds');
+        params.push({ name: 'beds', type: 'int', value: beds });
     }
-    if (bed_count) {
-        filterConditions.push('bed_count >= @bed_count');
-        params.push({ name: 'bed_count', type: 'int', value: bed_count });
+    if (room_type) {
+        filterConditions.push('room_type = @room_type');
+        params.push({ name: 'room_type', type: 'varchar', value: room_type });
     }
-    if (amenities) {
-        const amenitiesArray = amenities.split(',');
-        for (let i = 0; i < amenitiesArray.length; i++) {
-            filterConditions.push(`FIND_IN_SET(@amenity${i}, amenities)`);
-            params.push({ name: `amenity${i}`, type: 'varchar', value: amenitiesArray[i] });
-        }
+    if (rating) {
+        filterConditions.push('rating >= @rating');
+        params.push({ name: 'rating', type: 'float', value: rating });
     }
 
     const query = `
         SELECT * 
-        FROM Hotels 
+        FROM [dbo].[Hotel] 
         WHERE ${filterConditions.join(' AND ')}
     `;
 

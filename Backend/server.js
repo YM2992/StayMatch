@@ -13,6 +13,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const app = express();
 const path = require('path');
+const csv = require('csv-parser');
 
 // Middleware for parsing request bodies
 app.use(cors({ origin: '*' }));
@@ -49,6 +50,7 @@ app.listen(PORT, () => {
 const extractedDir = 'Backend/data/extracted';
 const blobDir = 'Backend/data/blob';
 const refinedDir = 'Backend/data/refined';
+const finalDir = 'Backend/data/finaldata';
 
 if (!fs.existsSync(extractedDir)) {
     fs.mkdirSync(extractedDir, { recursive: true });
@@ -157,29 +159,76 @@ async function main() {
     } catch (err) {
       console.error('🛑 booking scraper failed:', err);
     }
-    //
+    
         
     // REFINE: Refine/transform the data
     const inputDir = AZURE_ENABLED ? blobDir : extractedDir;
     const outputDir = refinedDir;
 
-    (async () => {
-        try {
-            const files = fs.readdirSync(inputDir).filter(file => file.endsWith('.csv'));
-    
-            for (const file of files) {
-                const inputPath = path.join(inputDir, file);
-                const outputPath = path.join(outputDir, `refined_${file}`);
-                await refineCSV(inputPath, outputPath, file);
-            }
-        } catch (err) {
-            console.error('🔥 Error refining CSVs:', err);
+    try {
+        const files = fs.readdirSync(inputDir).filter(file => file.endsWith('.csv'));
+
+        for (const file of files) {
+            const inputPath = path.join(inputDir, file);
+            const outputPath = path.join(outputDir, `refined_${file}`);
+            await refineCSV(inputPath, outputPath, file);
         }
-    })();
+    } catch (err) {
+        console.error('🔥 Error refining CSVs:', err);
+    }
     
     
     
     // LOAD: Load the data to the SQL database
+    console.log('Loading data into SQL database...');
+    try {
+        const rows = [];
+        const columns = [];
+        const finalCsvPath = path.join(finalDir, 'merged_finaldata.csv');
+        const stream = fs.createReadStream(finalCsvPath).pipe(csv());
+        const tableName = 'Hotel';
+        const batchSize = 100; // Number of rows per batch
+    
+        // Read CSV file and collect rows
+        for await (const row of stream) {
+            if (columns.length === 0) {
+                // Extract column names from the first row
+                Object.keys(row).forEach(col => columns.push(col));
+            }
+            rows.push(row);
+        }
+    
+        console.log(`📄 Loaded ${rows.length} rows from ${finalCsvPath}`);
+    
+        // Insert or update rows into the SQL table in batches
+        for (let i = 0; i < rows.length; i += batchSize) {
+            const batch = rows.slice(i, i + batchSize);
+    
+            for (const row of batch) {
+                const values = columns.map(col => `'${row[col].replace(/'/g, "''")}'`);
+                const updateSet = columns.map(col => `${col} = '${row[col].replace(/'/g, "''")}'`).join(', ');
+    
+                const query = `
+                    MERGE INTO ${tableName} AS Target
+                    USING (SELECT ${values.map((v, idx) => `${v} AS ${columns[idx]}`).join(', ')}) AS Source
+                    ON Target.name = Source.name
+                    WHEN MATCHED THEN
+                        UPDATE SET ${updateSet}
+                    WHEN NOT MATCHED THEN
+                        INSERT (${columns.join(', ')})
+                        VALUES (${values.join(', ')});
+                `;
+    
+                await Azure.executeQuery(query);
+            }
+    
+            console.log(`✅ Processed batch ${i / batchSize + 1} of ${Math.ceil(rows.length / batchSize)}`);
+        }
+    
+        console.log(`✅ Successfully loaded all data into table: ${tableName}`);
+    } catch (err) {
+        console.error('🔥 Error loading CSV to SQL:', err);
+    }
 }
 
 main().catch(err => {

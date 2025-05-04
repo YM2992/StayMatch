@@ -62,7 +62,6 @@ Azure.insertIntoTable = async function (tableName, columns, values) {
         const query = `INSERT INTO ${tableName} (${columns}) VALUES (${values})`;
         console.log(`Executing query: ${query}`);
 
-        if (true) return;
         const result = await this.executeQuery(query);
         return result;
     } catch (error) {
