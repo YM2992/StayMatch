@@ -8,6 +8,10 @@ const kaggleDataset = 'asafarji/saudi-arabia-bookingcom-2021'; // e.g. 'username
 const datasetFile = 'winemag-data_first150k.csv'; // file inside the dataset
 
 const downloadKaggleData = () => {
+    const kaggleConfigDir = path.join(__dirname, '../../');
+    console.log(`Setting KAGGLE_CONFIG_DIR to: ${kaggleConfigDir}`);
+    process.env.KAGGLE_CONFIG_DIR = kaggleConfigDir;
+
     const command = `kaggle datasets download -d ${kaggleDataset} -p ./Backend/data/extracted --unzip --force`;
     exec(command, (error, stdout, stderr) => {
         if (error) {
