@@ -84,30 +84,48 @@ const routes = [
             }
         }
     },
-    
+
 
     /* Hotels */
     {
         path: `${apiPath}/hotels`,
         method: 'get',
         handler: async (req, res) => {
-            const { name, location, price, beds, room_type, rating } = req.query;
+            const { name, location, price, currency, rating, room_type, beds, breakfast, free_cancellation, no_prepayment } = req.query;
             console.log(req.query)
 
             try {
                 const filters = {};
                 if (name) filters.name = name;
-                if (location) filters.location = location
+                if (location) filters.location = location;
                 if (price) filters.price = price;
-                if (beds) filters.beds = beds;
-                if (room_type) filters.room_type = room_type;
+                if (currency) filters.currency = currency;
                 if (rating) filters.rating = rating;
+                if (room_type) filters.room_type = room_type;
+                if (beds) filters.beds = beds;
+                if (breakfast != null) filters.breakfast = breakfast;
+                if (free_cancellation != null) filters.free_cancellation = free_cancellation;
+                if (no_prepayment != null) filters.no_prepayment = no_prepayment;
 
                 const hotels = await hotelHandler.getHotels(filters);
 
                 return res.status(200).json({ hotels });
             } catch (error) {
                 return res.status(500).json({ error: error.message || 'An error occurred while fetching hotels' });
+            }
+        }
+    },
+
+    {
+        path: `${apiPath}/hotels/getFilters`,
+        method: 'get',
+        handler: async (req, res) => {
+            console.log('Fetching filters...');
+            try {
+                const filters = await hotelHandler.getFilters();
+                return res.status(200).json({ filters });
+            } catch (error) {
+                return res.status(500).json({ error: error.message || 'An error occurred while fetching filters' });
             }
         }
     }
