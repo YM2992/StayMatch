@@ -82,21 +82,21 @@ module.exports = async function refineCSV() {
             // Extras with defaults
             const RoomType          = row['Room Type']?.trim() || 'N/A';
             const BedInfo           = row['Bed Info']?.trim()  || 'N/A';
-            const BreakfastIncluded = breakfastKey && row[breakfastKey].toString().toUpperCase()==='YES' ? 'YES' : 'NO';
-            const FreeCancellation  = freeCancelKey && row[freeCancelKey].toString().toUpperCase()==='YES' ? 'YES' : 'NO';
-            const NoPrepayment      = noPrepaymentKey && row[noPrepaymentKey].toString().toUpperCase()==='YES' ? 'YES' : 'NO';
+            const BreakfastIncluded = breakfastKey && row[breakfastKey].toString().toUpperCase()==='YES' ? 'true' : 'false';
+            const FreeCancellation  = freeCancelKey && row[freeCancelKey].toString().toUpperCase()==='YES' ? 'true' : 'false';
+            const NoPrepayment      = noPrepaymentKey && row[noPrepaymentKey].toString().toUpperCase()==='YES' ? 'true' : 'false';
 
             rows.push({
-              Name,
-              Location,
-              Price,
-              Currency,
-              Rating,
-              'Room Type': RoomType,
-              'Bed Info': BedInfo,
-              'Breakfast included': BreakfastIncluded,
-              'Free cancellation': FreeCancellation,
-              'No Prepayment': NoPrepayment
+              name: Name,
+              location: Location,
+              price: Price,
+              currency: Currency,
+              rating: Rating,
+              room_type: RoomType,
+              beds: BedInfo,
+              breakfast: BreakfastIncluded,
+              free_cancellation: FreeCancellation,
+              no_prepayment: NoPrepayment
             });
           })
           .on('end', resolve)
@@ -110,9 +110,8 @@ module.exports = async function refineCSV() {
 
       // Write refined file
       const fields = [
-        'Name','Location','Price','Currency','Rating',
-        'Room Type','Bed Info','Breakfast included',
-        'Free cancellation','No Prepayment'
+        'name', 'location', 'price', 'currency', 'rating',
+        'room_type', 'beds', 'breakfast', 'free_cancellation', 'no_prepayment'
       ];
       const csvOutput = parse(rows, { fields });
       const outName   = `R_${file}`;

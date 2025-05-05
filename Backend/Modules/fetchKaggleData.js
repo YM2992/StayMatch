@@ -1,3 +1,4 @@
+ 
 const { exec } = require('child_process');
 const fs = require('fs');
 const path = require('path');
@@ -7,7 +8,7 @@ const kaggleDataset = 'asafarji/saudi-arabia-bookingcom-2021'; // e.g. 'username
 const datasetFile = 'winemag-data_first150k.csv'; // file inside the dataset
 
 const downloadKaggleData = () => {
-    const command = `kaggle datasets download -d ${kaggleDataset} -p ./Backend/data --unzip --force`;
+    const command = `kaggle datasets download -d ${kaggleDataset} -p ./Backend/data/extracted --unzip --force`;
     exec(command, (error, stdout, stderr) => {
         if (error) {
             console.error(`❌ Error downloading dataset: ${error.message}`);
@@ -20,13 +21,18 @@ const downloadKaggleData = () => {
 
         console.log(`✅ Kaggle dataset downloaded:\n${stdout}`);
 
-        const filePath = path.join(__dirname, 'data', datasetFile);
+        const filePath = path.join(__dirname, 'Backend/data/extracted', datasetFile);
         if (fs.existsSync(filePath)) {
             console.log(`✅ File saved locally at: ${filePath}`);
         } else {
             console.error('❌ File not found after download. Please check the dataset and filename.');
         }
     });
-};
+  }
+
+// Make sure data dir exists
+if (!fs.existsSync('./data')) {
+    fs.mkdirSync('./data');
+}
 
 module.exports = downloadKaggleData;
