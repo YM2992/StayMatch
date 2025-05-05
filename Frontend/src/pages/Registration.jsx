@@ -75,7 +75,7 @@ function Registration() {
         alert("Registration failed: " + response.error);
       } else {
         alert("Registration successful!");
-        navigate("/main");
+        navigate("/filter");
       }
     }
   };

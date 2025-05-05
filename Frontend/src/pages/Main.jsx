@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { SearchIcon } from "lucide-react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -7,6 +7,7 @@ import meccaImg from "../assets/mecca.webp";
 import medinaImg from "../assets/medina.jpg";
 import riyadhImg from "../assets/riyadh.jpg";
 import taifImg from "../assets/taif.jpg";
+import api from "../api";
 
 function Main() {
   const [destination, setDestination] = useState("");
@@ -19,43 +20,106 @@ function Main() {
 
   const isFormComplete = destination && checkIn && checkOut;
 
-  const handleSearch = () => {
-    if (!isFormComplete) return;
+  const fetchHotels = async () => {
+    try {
+      const filters = api.getParamsFromURL();
 
-    const mockResults = [
-      {
-        id: 1,
-        name: "Taiwan Seven Days Boutique Hotel",
-        location: "Wanhua District, Taipei",
-        rating: 7.4,
-        ratingText: "Good",
-        reviews: 528,
-        price: 3002,
-        originalPrice: 6982,
-        nights: `${Math.ceil(
-          (checkOut - checkIn) / (1000 * 60 * 60 * 24)
-        )} nights, ${adults} adults`,
-        image:
-          "https://cf.bstatic.com/xdata/images/hotel/square600/53425499.jpg",
-      },
-      {
-        id: 2,
-        name: "Sundaily Hostel 北車",
-        location: "Zhongzheng District, Taipei",
-        rating: 9.0,
-        ratingText: "Superb",
-        reviews: 1287,
-        price: 1766,
-        originalPrice: null,
-        nights: `${Math.ceil(
-          (checkOut - checkIn) / (1000 * 60 * 60 * 24)
-        )} nights, ${adults} adults`,
-        image:
-          "https://cf.bstatic.com/xdata/images/hotel/square600/332366810.jpg",
-      },
-    ];
+      if (!filters) throw new Error("No filters found");
 
-    setSearchResults(mockResults);
+      const cache = localStorage.getItem("cachedHotels");
+      if (cache) {
+        console.log("CachedHotels found");
+        const cacheJSON = JSON.parse(cache);
+        const cachedTime = cacheJSON.fetchedTime;
+
+        const currentTime = new Date().getTime();
+        const cachedTimeInMs = new Date(cachedTime).getTime();
+        const timeDiff = currentTime - cachedTimeInMs;
+        console.log("Time difference:", timeDiff);
+
+        if (timeDiff > 1000 * 60 * 60) { // 1 hour
+          localStorage.removeItem("cachedHotels");
+        } else {
+          if (JSON.stringify(cacheJSON.filters) === JSON.stringify(filters)) {
+            console.log("Using cached hotels data");
+            return cacheJSON.hotels;
+          } else {
+            console.log("Cached data is not valid for the current filters. Fetching from API.");
+          }
+        }
+      }
+
+      
+      console.log("No timely cached data found. Fetching hotels from API");
+
+      const response = await api.httpGet(api.paths.getHotels, filters);
+      if (response.status !== 200) throw new Error("Failed to fetch hotels");
+      const hotels = response.data.hotels;
+      if (!hotels) throw new Error("No hotels found");
+
+      const fetchedTime = new Date().toUTCString();
+      localStorage.setItem("cachedHotels", JSON.stringify({ fetchedTime, filters, hotels }));
+
+      return hotels;
+    } catch (error) {
+      console.error("Error fetching hotels:", error);
+    }
+  };
+
+  useEffect(() => {
+    const fetchAndSetHotels = async () => {
+      try {
+        const response = await fetchHotels();
+        if (response) {
+          console.log(response);
+          setSearchResults(response);
+        }
+      } catch (error) {
+        console.error("Error fetching hotels:", error);
+      }
+    };
+
+    fetchAndSetHotels();
+  }, []);
+
+
+  const handleSearch = async () => {
+    // if (!isFormComplete) return;
+
+    // const mockResults = [
+    //   {
+    //     id: 1,
+    //     name: "Taiwan Seven Days Boutique Hotel",
+    //     location: "Wanhua District, Taipei",
+    //     rating: 7.4,
+    //     ratingText: "Good",
+    //     reviews: 528,
+    //     price: 3002,
+    //     originalPrice: 6982,
+    //     nights: `${Math.ceil(
+    //       (checkOut - checkIn) / (1000 * 60 * 60 * 24)
+    //     )} nights, ${adults} adults`,
+    //     image:
+    //       "https://cf.bstatic.com/xdata/images/hotel/square600/53425499.jpg",
+    //   },
+    //   {
+    //     id: 2,
+    //     name: "Sundaily Hostel 北車",
+    //     location: "Zhongzheng District, Taipei",
+    //     rating: 9.0,
+    //     ratingText: "Superb",
+    //     reviews: 1287,
+    //     price: 1766,
+    //     originalPrice: null,
+    //     nights: `${Math.ceil(
+    //       (checkOut - checkIn) / (1000 * 60 * 60 * 24)
+    //     )} nights, ${adults} adults`,
+    //     image:
+    //       "https://cf.bstatic.com/xdata/images/hotel/square600/332366810.jpg",
+    //   },
+    // ];
+
+    // setSearchResults(mockResults);
   };
 
   return (

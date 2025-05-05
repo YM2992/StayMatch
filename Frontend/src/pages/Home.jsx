@@ -49,7 +49,7 @@ function Home() {
         alert("Login failed: " + response.error);
       } else {
         alert("Login successful!");
-        navigate("/main");
+        navigate("/filter");
       }
     }
   };

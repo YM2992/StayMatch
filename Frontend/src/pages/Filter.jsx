@@ -1,14 +1,27 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import profileIcon from "../assets/profile-icon.svg";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import api from "../api";
 
 // MOCK API DATA
+const filterRenames = {
+  "Location": "location",
+  "Price Range": "price",
+  "Money Currency": "currency",
+  "Rating": "rating",
+  "Room Type": "room_type",
+  "Bed Info": "beds",
+  "Breakfast Included": "breakfast",
+  "Free Cancellation": "free_cancellation",
+  "No Prepayment": "no_prepayment",
+};
+
 const MOCK_API_DATA = {
-  Location: ["New York", "Paris", "Tokyo", "Cairo"],
+  "Location": ["New York", "Paris", "Tokyo", "Cairo"],
   "Price Range": ["$50 - $100", "$100 - $200", "$200+"],
-  "Money Currency": ["USD", "EUR", "JPY", "EGP"],
-  Rating: ["1 Star", "2 Stars", "3 Stars", "4 Stars", "5 Stars"],
+  "Money Currency": ["SAR"],
+  "Rating": ["1 Star", "2 Stars", "3 Stars", "4 Stars", "5 Stars"],
   "Room Type": [
     "1 Bathroom, 1 Window",
     "2 Bathrooms, No Window",
@@ -27,6 +40,46 @@ export default function Filter() {
   const [options, setOptions] = useState([]);
   const [activeFilter, setActiveFilter] = useState(null);
   const [selectedFilters, setSelectedFilters] = useState({});
+  const [availableFilters, setAvailableFilters] = useState([]);
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchAvailableFilters = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await api.httpGet(api.paths.getFilters);
+        
+        if (response.status !== 200) throw new Error("Failed to fetch filters");
+        
+        const filters = response.data.filters;
+        if (!filters) throw new Error("No filters found");
+        let collatedFilters = {
+          "Location": filters.locations,
+          "Price Range": MOCK_API_DATA["Price Range"],
+          "Money Currency": filters.currencies,
+          "Rating": MOCK_API_DATA["Rating"],
+          "Room Type": filters.room_types,
+          "Bed Info": filters.beds,
+          "Breakfast Included": MOCK_API_DATA["Breakfast Included"],
+          "Free Cancellation": MOCK_API_DATA["Free Cancellation"],
+          "No Prepayment": MOCK_API_DATA["No Prepayment"]
+        };
+
+        console.log("Available Filters:", collatedFilters);
+        
+        setAvailableFilters(collatedFilters);
+      } catch (err) {
+        console.error(err);
+        setError("Failed to fetch filters. Please try again.");
+        toast.error("Failed to fetch filters. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAvailableFilters();
+  }, []);
 
   const handleFilterClick = async (filterType) => {
     setLoading(true);
@@ -35,8 +88,7 @@ export default function Filter() {
     setOptions([]);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 800));
-      const fetchedOptions = MOCK_API_DATA[filterType];
+      const fetchedOptions = availableFilters[filterType] || [];
       if (!fetchedOptions) throw new Error("Data not found");
 
       setOptions(fetchedOptions);
@@ -74,6 +126,38 @@ export default function Filter() {
         };
       }
     });
+  };
+
+  const handleSearch = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      // Map selectedFilters keys using dataRenames
+      const renamedFilters = Object.entries(selectedFilters).reduce(
+        (acc, [key, value]) => {
+          const renamedKey = filterRenames[key] || key;
+
+          const transformedValue = value.map((item) =>
+            item === "Yes" ? true : item === "No" ? false : item
+          );
+
+
+          acc[renamedKey] = transformedValue;
+          return acc;
+        },
+        {}
+      );
+
+      const queryString = api.makeQueryString(renamedFilters);
+
+      navigate(`/main${queryString}`);
+    } catch (err) {
+      console.error(err);
+      setError("Failed to fetch hotels. Please try again.");
+      toast.error("Failed to fetch hotels. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const isOptionSelected = (filterType, option) => {
@@ -185,7 +269,10 @@ export default function Filter() {
 
         {/* Search Button */}
         <div className="flex justify-center">
-          <button className="w-40 h-10 bg-[#1a4467] hover:bg-[#163554] text-white rounded-full flex justify-center items-center hover:scale-110 transition-transform duration-300">
+          <button
+            onClick={handleSearch}
+            className="w-40 h-10 bg-[#1a4467] hover:bg-[#163554] text-white rounded-full flex justify-center items-center hover:scale-110 transition-transform duration-300"
+          >
             SEARCH
           </button>
         </div>

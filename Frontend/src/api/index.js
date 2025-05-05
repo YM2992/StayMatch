@@ -9,18 +9,36 @@ const paths = {
     getUser: "user/get",
 
     // Hotels
-    getHotels: "hotels"
+    getHotels: "hotels",
+    getFilters: "hotels/getFilters",
 }
 let functions = {}
 
-functions.httpGet = async (url) => {
-    const response = await fetch(`${API_URL}/${url}`, {
+functions.makeQueryString = (params) => {
+    const queryString = params ? new URLSearchParams(params).toString() : "";
+    return queryString ? `?${queryString}` : "";
+}
+
+functions.getParamsFromURL = () => {
+    const url = window.location.href;
+    const params = new URL(url).searchParams;
+    const paramsObj = {};
+    for (const [key, value] of params.entries()) {
+        paramsObj[key] = value;
+    }
+    return paramsObj;
+}
+
+functions.httpGet = async (url, params) => {
+    const queryString = functions.makeQueryString(params);
+    const response = await fetch(`${API_URL}/${url}${queryString ? queryString : ""}`, {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
         },
     });
-    return await response.json();
+    const data = await response.json();
+    return { status: response.status, data };
 };
 
 functions.httpPost = async (url, data) => {
