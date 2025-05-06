@@ -1,57 +1,77 @@
 import { useState } from "react";
 import { SearchIcon } from "lucide-react";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
 import jeddahImg from "../assets/jeddah.jpg";
 import meccaImg from "../assets/mecca.webp";
 import medinaImg from "../assets/medina.jpg";
 import riyadhImg from "../assets/riyadh.jpg";
 import taifImg from "../assets/taif.jpg";
+import hotelone from "../assets/one.jpg";
+import hoteltwo from "../assets/two.jpeg";
+import hotelthree from "../assets/three.webp";
+import hotelfour from "../assets/four.jpg";
 
 function Main() {
-  const [destination, setDestination] = useState("");
-  const [checkIn, setCheckIn] = useState(null);
-  const [checkOut, setCheckOut] = useState(null);
-  const [adults, setAdults] = useState(2);
-  const [children, setChildren] = useState(0);
-  const [rooms, setRooms] = useState(1);
   const [searchResults, setSearchResults] = useState([]);
 
-  const isFormComplete = destination && checkIn && checkOut;
+  // Mock data for static display
+  const mockData = {
+    destination: "Mecca",
+    checkIn: "2025-06-01",
+    checkOut: "2025-06-05",
+    adults: 2,
+    children: 0,
+    rooms: 1,
+  };
 
   const handleSearch = () => {
-    if (!isFormComplete) return;
-
     const mockResults = [
       {
         id: 1,
-        name: "Taiwan Seven Days Boutique Hotel",
-        location: "Wanhua District, Taipei",
-        rating: 7.4,
-        ratingText: "Good",
-        reviews: 528,
-        price: 3002,
-        originalPrice: 6982,
-        nights: `${Math.ceil(
-          (checkOut - checkIn) / (1000 * 60 * 60 * 24)
-        )} nights, ${adults} adults`,
-        image:
-          "https://cf.bstatic.com/xdata/images/hotel/square600/53425499.jpg",
+        name: "Red Sea Horizon Hotel",
+        location: "Corniche Road, Jeddah",
+        rating: 8.1,
+        ratingText: "Very Good",
+        reviews: 745,
+        price: 4200,
+        originalPrice: 5890,
+        nights: `4 nights, ${mockData.adults} adults`,
+        image: hotelone, // ✅ use variable, not string
       },
       {
         id: 2,
-        name: "Sundaily Hostel 北車",
-        location: "Zhongzheng District, Taipei",
-        rating: 9.0,
+        name: "Palm Gate Suites",
+        location: "Al Zahra District, Jeddah",
+        rating: 9.3,
         ratingText: "Superb",
-        reviews: 1287,
-        price: 1766,
+        reviews: 1102,
+        price: 3550,
         originalPrice: null,
-        nights: `${Math.ceil(
-          (checkOut - checkIn) / (1000 * 60 * 60 * 24)
-        )} nights, ${adults} adults`,
-        image:
-          "https://cf.bstatic.com/xdata/images/hotel/square600/332366810.jpg",
+        nights: `4 nights, ${mockData.adults} adults`,
+        image: hoteltwo,
+      },
+      {
+        id: 3,
+        name: "Bayfront Breeze Hotel",
+        location: "North Obhur, Jeddah",
+        rating: 7.8,
+        ratingText: "Good",
+        reviews: 398,
+        price: 2800,
+        originalPrice: 3590,
+        nights: `4 nights, ${mockData.adults} adults`,
+        image: hotelthree,
+      },
+      {
+        id: 4,
+        name: "Golden Palm Inn",
+        location: "Al Andalus, Jeddah",
+        rating: 8.6,
+        ratingText: "Fabulous",
+        reviews: 612,
+        price: 3999,
+        originalPrice: null,
+        nights: `4 nights, ${mockData.adults} adults`,
+        image: hotelfour,
       },
     ];
 
@@ -81,75 +101,39 @@ function Main() {
             Search low prices on hotels, homes and much more...
           </p>
 
-          <div className="bg-white text-black rounded-xl shadow p-4 grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
-            <div className="text-sm font-medium mb-1 text-black">
-              Destination
-              <input
-                type="text"
-                placeholder="Where are you going?"
-                value={destination}
-                onChange={(e) => setDestination(e.target.value)}
-                className="border px-3 py-2 rounded-md w-full"
-              />
+          {/* Replaced Input Section with Static Display */}
+          <div className="bg-white text-black rounded-xl shadow p-4 grid grid-cols-1 md:grid-cols-4 gap-4 items-center text-sm font-medium">
+            <div>
+              <p className="text-gray-500">Destination</p>
+              <p className="text-black">{mockData.destination}</p>
             </div>
-
-            <div className="text-sm font-medium mb-1 text-black flex flex-col">
-              Check In Date
-              <DatePicker
-                selected={checkIn}
-                onChange={(date) => setCheckIn(date)}
-                className="border px-3 py-2 rounded-md w-full"
-                placeholderText="Select check-in"
-                dateFormat="yyyy-MM-dd"
-              />
+            <div>
+              <p className="text-gray-500">Check In Date</p>
+              <p className="text-black">{mockData.checkIn}</p>
             </div>
-
-            <div className="text-sm font-medium mb-1 text-black flex flex-col">
-              Check Out Date
-              <DatePicker
-                selected={checkOut}
-                onChange={(date) => setCheckOut(date)}
-                className="border px-3 py-2 rounded-md w-full"
-                placeholderText="Select check-out"
-                dateFormat="yyyy-MM-dd"
-                minDate={checkIn}
-              />
+            <div>
+              <p className="text-gray-500">Check Out Date</p>
+              <p className="text-black">{mockData.checkOut}</p>
             </div>
-
-            <div className="text-sm font-medium mb-1 text-black">
-              Guests & Rooms
-              <select
-                className="border rounded px-3 py-2 w-full"
-                value={`${adults},${children},${rooms}`}
-                onChange={(e) => {
-                  const [a, c, r] = e.target.value.split(",").map(Number);
-                  setAdults(a);
-                  setChildren(c);
-                  setRooms(r);
-                }}
-              >
-                <option value="2,0,1">2 adults · 0 children · 1 room</option>
-                <option value="1,1,1">1 adult · 1 child · 1 room</option>
-                <option value="2,2,2">2 adults · 2 children · 2 rooms</option>
-              </select>
+            <div>
+              <p className="text-gray-500">Guests & Rooms</p>
+              <p className="text-black">
+                {mockData.adults} adults · {mockData.children} children ·{" "}
+                {mockData.rooms} room
+              </p>
             </div>
 
             <button
-              className={`col-span-1 md:col-span-auto px-4 py-2 rounded-full flex items-center justify-center transition-transform ${
-                isFormComplete
-                  ? "bg-[#b0cde5] hover:bg-[#99bbdb] text-white hover:scale-105"
-                  : "bg-gray-400 text-white cursor-not-allowed"
-              }`}
+              className="col-span-1 md:col-span-auto px-4 py-2 rounded-full flex items-center justify-center transition-transform bg-[#b0cde5] hover:bg-[#99bbdb] text-white hover:scale-105"
               onClick={handleSearch}
-              disabled={!isFormComplete}
             >
               <SearchIcon className="mr-2 h-4 w-4" />
-              Search
+              Back to Filters
             </button>
           </div>
 
           {/* Recommended Stays */}
-          {searchResults.length > 0 && (
+          {
             <div className="mt-12">
               <h3 className="text-2xl font-semibold text-black mb-1">
                 Recommended Stays
@@ -204,7 +188,7 @@ function Main() {
                 ))}
               </div>
             </div>
-          )}
+          }
 
           {/* Trending Locations */}
           <div className="mt-12">
