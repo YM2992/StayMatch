@@ -47,6 +47,7 @@ function Main() {
         originalPrice: 5890,
         nights: `4 nights, ${mockData.adults} adults`,
         image: hotelone,
+        link: "https://papertoilet.com/",
       },
       {
         id: 2,
@@ -59,6 +60,7 @@ function Main() {
         originalPrice: null,
         nights: `4 nights, ${mockData.adults} adults`,
         image: hoteltwo,
+        link: "https://papertoilet.com/",
       },
       {
         id: 3,
@@ -71,6 +73,7 @@ function Main() {
         originalPrice: 3590,
         nights: `4 nights, ${mockData.adults} adults`,
         image: hotelthree,
+        link: "https://papertoilet.com/",
       },
       {
         id: 4,
@@ -83,6 +86,7 @@ function Main() {
         originalPrice: null,
         nights: `4 nights, ${mockData.adults} adults`,
         image: hotelfour,
+        link: "https://papertoilet.com/",
       },
     ];
     setSearchResults(mockResults);
@@ -201,9 +205,12 @@ function Main() {
 
             <div className="grid gap-6 md:grid-cols-2">
               {searchResults.map((stay) => (
-                <div
+                <a
                   key={stay.id}
-                  className="flex bg-white rounded-xl shadow overflow-hidden relative"
+                  href={stay.link || "#"}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex bg-white rounded-xl shadow overflow-hidden relative hover:scale-[1.01] transition-transform"
                 >
                   {/* Favorite Star */}
                   <div
@@ -253,7 +260,7 @@ function Main() {
                       </div>
                     </div>
                   </div>
-                </div>
+                </a>
               ))}
             </div>
           </div>
