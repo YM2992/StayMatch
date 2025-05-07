@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { SearchIcon } from "lucide-react";
 import jeddahImg from "../assets/jeddah.jpg";
 import meccaImg from "../assets/mecca.webp";
@@ -13,7 +13,6 @@ import hotelfour from "../assets/four.jpg";
 function Main() {
   const [searchResults, setSearchResults] = useState([]);
 
-  // Mock data for static display
   const mockData = {
     destination: "Mecca",
     checkIn: "2025-06-01",
@@ -35,7 +34,7 @@ function Main() {
         price: 4200,
         originalPrice: 5890,
         nights: `4 nights, ${mockData.adults} adults`,
-        image: hotelone, // ✅ use variable, not string
+        image: hotelone,
       },
       {
         id: 2,
@@ -77,6 +76,11 @@ function Main() {
     setSearchResults(mockResults);
   };
 
+  // ✅ Automatically run search on first render
+  useEffect(() => {
+    handleSearch();
+  }, []);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#3a506b] to-[#1c1c2b] flex items-center justify-center p-[5%]">
       <div className="bg-gray-100 p-8 rounded-xl shadow-md w-full">
@@ -100,7 +104,6 @@ function Main() {
             Search low prices on hotels, homes and much more...
           </p>
 
-          {/* Replaced Input Section with Static Display */}
           <div className="bg-white text-black rounded-xl shadow p-4 grid grid-cols-1 md:grid-cols-4 gap-4 items-center text-sm font-medium">
             <div>
               <p className="text-gray-500">Location</p>
@@ -166,65 +169,61 @@ function Main() {
             </button>
           </div>
 
-          {/* Recommended Stays */}
-          {
-            <div className="mt-12">
-              <h3 className="text-2xl font-semibold text-black mb-1">
-                Recommended Stays
-              </h3>
-              <p className="text-md text-gray-500 mb-6">
-                Available stays based on your filters
-              </p>
+          <div className="mt-12">
+            <h3 className="text-2xl font-semibold text-black mb-1">
+              Recommended Stays
+            </h3>
+            <p className="text-md text-gray-500 mb-6">
+              Available stays based on your filters
+            </p>
 
-              <div className="grid gap-6 md:grid-cols-2">
-                {searchResults.map((stay) => (
-                  <div
-                    key={stay.id}
-                    className="flex bg-white rounded-xl shadow overflow-hidden"
-                  >
-                    <img
-                      src={stay.image}
-                      alt={stay.name}
-                      className="w-40 h-40 object-cover rounded-l-xl"
-                    />
-                    <div className="p-4 flex flex-col justify-between flex-grow">
+            <div className="grid gap-6 md:grid-cols-2">
+              {searchResults.map((stay) => (
+                <div
+                  key={stay.id}
+                  className="flex bg-white rounded-xl shadow overflow-hidden"
+                >
+                  <img
+                    src={stay.image}
+                    alt={stay.name}
+                    className="w-40 h-40 object-cover rounded-l-xl"
+                  />
+                  <div className="p-4 flex flex-col justify-between flex-grow">
+                    <div>
+                      <h4 className="font-semibold text-lg text-[#1c1c2b]">
+                        {stay.name}
+                      </h4>
+                      <p className="text-sm text-gray-500">{stay.location}</p>
+                      <p className="text-sm mt-1 text-gray-700">
+                        {stay.nights}
+                      </p>
+                    </div>
+                    <div className="flex justify-between items-end mt-4">
                       <div>
-                        <h4 className="font-semibold text-lg text-[#1c1c2b]">
-                          {stay.name}
-                        </h4>
-                        <p className="text-sm text-gray-500">{stay.location}</p>
-                        <p className="text-sm mt-1 text-gray-700">
-                          {stay.nights}
+                        {stay.originalPrice && (
+                          <span className="text-sm text-gray-500 line-through">
+                            AUD {stay.originalPrice}
+                          </span>
+                        )}
+                        <p className="text-lg font-bold text-[#1c1c2b]">
+                          AUD {stay.price}
                         </p>
                       </div>
-                      <div className="flex justify-between items-end mt-4">
-                        <div>
-                          {stay.originalPrice && (
-                            <span className="text-sm text-gray-500 line-through">
-                              AUD {stay.originalPrice}
-                            </span>
-                          )}
-                          <p className="text-lg font-bold text-[#1c1c2b]">
-                            AUD {stay.price}
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-sm text-gray-500">
-                            {stay.ratingText}
-                          </p>
-                          <p className="text-lg font-bold text-blue-600">
-                            {stay.rating}
-                          </p>
-                        </div>
+                      <div className="text-right">
+                        <p className="text-sm text-gray-500">
+                          {stay.ratingText}
+                        </p>
+                        <p className="text-lg font-bold text-blue-600">
+                          {stay.rating}
+                        </p>
                       </div>
                     </div>
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </div>
-          }
+          </div>
 
-          {/* Trending Locations */}
           <div className="mt-12">
             <h3 className="text-2xl font-semibold text-black mb-1">
               Trending destinations
