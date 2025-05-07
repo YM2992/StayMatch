@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
-import { SearchIcon } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { SearchIcon, Star, StarIcon } from "lucide-react"; // Star = outline, StarIcon = filled
+
 import jeddahImg from "../assets/jeddah.jpg";
 import meccaImg from "../assets/mecca.webp";
 import medinaImg from "../assets/medina.jpg";
@@ -11,15 +13,25 @@ import hotelthree from "../assets/three.webp";
 import hotelfour from "../assets/four.jpg";
 
 function Main() {
+  const navigate = useNavigate();
   const [searchResults, setSearchResults] = useState([]);
+  const [favorites, setFavorites] = useState([]);
 
   const mockData = {
     destination: "Mecca",
     checkIn: "2025-06-01",
     checkOut: "2025-06-05",
     adults: 2,
-    children: 0,
+    children: 1,
     rooms: 1,
+    priceRange: "2000 - 5000 SAR",
+    currency: "SAR",
+    rating: "8+",
+    roomType: "Deluxe Suite",
+    bedInfo: "1 King Bed + 1 Sofa Bed",
+    breakfastIncluded: true,
+    freeCancellation: true,
+    noPrepayment: true,
   };
 
   const handleSearch = () => {
@@ -76,10 +88,15 @@ function Main() {
     setSearchResults(mockResults);
   };
 
-  // ✅ Automatically run search on first render
   useEffect(() => {
     handleSearch();
   }, []);
+
+  const toggleFavorite = (id) => {
+    setFavorites((prev) =>
+      prev.includes(id) ? prev.filter((favId) => favId !== id) : [...prev, id]
+    );
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#3a506b] to-[#1c1c2b] flex items-center justify-center p-[5%]">
@@ -105,70 +122,75 @@ function Main() {
           </p>
 
           <div className="bg-white text-black rounded-xl shadow p-4 grid grid-cols-1 md:grid-cols-4 gap-4 items-center text-sm font-medium">
+            {/* Mock filter info display */}
             <div>
               <p className="text-gray-500">Location</p>
               <p className="text-black">{mockData.destination}</p>
             </div>
             <div>
-              <p className="text-gray-500">Price Range</p>
+              <p className="text-gray-500">Check-in</p>
               <p className="text-black">{mockData.checkIn}</p>
             </div>
             <div>
-              <p className="text-gray-500">Money Currency</p>
+              <p className="text-gray-500">Check-out</p>
               <p className="text-black">{mockData.checkOut}</p>
             </div>
             <div>
-              <p className="text-gray-500">Rating</p>
+              <p className="text-gray-500">Guests</p>
               <p className="text-black">
                 {mockData.adults} adults · {mockData.children} children ·{" "}
                 {mockData.rooms} room
               </p>
+            </div>
+            <div>
+              <p className="text-gray-500">Price Range</p>
+              <p className="text-black">{mockData.priceRange}</p>
+            </div>
+            <div>
+              <p className="text-gray-500">Currency</p>
+              <p className="text-black">{mockData.currency}</p>
+            </div>
+            <div>
+              <p className="text-gray-500">Rating</p>
+              <p className="text-black">{mockData.rating}</p>
             </div>
             <div>
               <p className="text-gray-500">Room Type</p>
-              <p className="text-black">
-                {mockData.adults} adults · {mockData.children} children ·{" "}
-                {mockData.rooms} room
-              </p>
+              <p className="text-black">{mockData.roomType}</p>
             </div>
             <div>
               <p className="text-gray-500">Bed Info</p>
-              <p className="text-black">
-                {mockData.adults} adults · {mockData.children} children ·{" "}
-                {mockData.rooms} room
-              </p>
+              <p className="text-black">{mockData.bedInfo}</p>
             </div>
             <div>
               <p className="text-gray-500">Breakfast Included</p>
               <p className="text-black">
-                {mockData.adults} adults · {mockData.children} children ·{" "}
-                {mockData.rooms} room
+                {mockData.breakfastIncluded ? "Yes" : "No"}
               </p>
             </div>
             <div>
               <p className="text-gray-500">Free Cancellation</p>
               <p className="text-black">
-                {mockData.adults} adults · {mockData.children} children ·{" "}
-                {mockData.rooms} room
+                {mockData.freeCancellation ? "Yes" : "No"}
               </p>
             </div>
             <div>
               <p className="text-gray-500">No Prepayment</p>
               <p className="text-black">
-                {mockData.adults} adults · {mockData.children} children ·{" "}
-                {mockData.rooms} room
+                {mockData.noPrepayment ? "Yes" : "No"}
               </p>
             </div>
 
             <button
               className="col-span-1 md:col-span-auto px-4 py-2 rounded-full flex items-center justify-center transition-transform bg-[#b0cde5] hover:bg-[#99bbdb] text-white hover:scale-105"
-              onClick={handleSearch}
+              onClick={() => navigate("/filter")}
             >
               <SearchIcon className="mr-2 h-4 w-4" />
               Back to Filters
             </button>
           </div>
 
+          {/* Recommended Stays */}
           <div className="mt-12">
             <h3 className="text-2xl font-semibold text-black mb-1">
               Recommended Stays
@@ -181,8 +203,20 @@ function Main() {
               {searchResults.map((stay) => (
                 <div
                   key={stay.id}
-                  className="flex bg-white rounded-xl shadow overflow-hidden"
+                  className="flex bg-white rounded-xl shadow overflow-hidden relative"
                 >
+                  {/* Favorite Star */}
+                  <div
+                    className="absolute top-2 right-2 cursor-pointer z-10"
+                    onClick={() => toggleFavorite(stay.id)}
+                  >
+                    {favorites.includes(stay.id) ? (
+                      <StarIcon className="text-yellow-400" />
+                    ) : (
+                      <Star className="text-gray-400" />
+                    )}
+                  </div>
+
                   <img
                     src={stay.image}
                     alt={stay.name}
@@ -224,6 +258,7 @@ function Main() {
             </div>
           </div>
 
+          {/* Trending Destinations */}
           <div className="mt-12">
             <h3 className="text-2xl font-semibold text-black mb-1">
               Trending destinations
