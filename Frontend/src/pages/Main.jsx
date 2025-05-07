@@ -74,7 +74,6 @@ function Main() {
         image: hotelfour,
       },
     ];
-
     setSearchResults(mockResults);
   };
 
@@ -104,19 +103,54 @@ function Main() {
           {/* Replaced Input Section with Static Display */}
           <div className="bg-white text-black rounded-xl shadow p-4 grid grid-cols-1 md:grid-cols-4 gap-4 items-center text-sm font-medium">
             <div>
-              <p className="text-gray-500">Destination</p>
+              <p className="text-gray-500">Location</p>
               <p className="text-black">{mockData.destination}</p>
             </div>
             <div>
-              <p className="text-gray-500">Check In Date</p>
+              <p className="text-gray-500">Price Range</p>
               <p className="text-black">{mockData.checkIn}</p>
             </div>
             <div>
-              <p className="text-gray-500">Check Out Date</p>
+              <p className="text-gray-500">Money Currency</p>
               <p className="text-black">{mockData.checkOut}</p>
             </div>
             <div>
-              <p className="text-gray-500">Guests & Rooms</p>
+              <p className="text-gray-500">Rating</p>
+              <p className="text-black">
+                {mockData.adults} adults · {mockData.children} children ·{" "}
+                {mockData.rooms} room
+              </p>
+            </div>
+            <div>
+              <p className="text-gray-500">Room Type</p>
+              <p className="text-black">
+                {mockData.adults} adults · {mockData.children} children ·{" "}
+                {mockData.rooms} room
+              </p>
+            </div>
+            <div>
+              <p className="text-gray-500">Bed Info</p>
+              <p className="text-black">
+                {mockData.adults} adults · {mockData.children} children ·{" "}
+                {mockData.rooms} room
+              </p>
+            </div>
+            <div>
+              <p className="text-gray-500">Breakfast Included</p>
+              <p className="text-black">
+                {mockData.adults} adults · {mockData.children} children ·{" "}
+                {mockData.rooms} room
+              </p>
+            </div>
+            <div>
+              <p className="text-gray-500">Free Cancellation</p>
+              <p className="text-black">
+                {mockData.adults} adults · {mockData.children} children ·{" "}
+                {mockData.rooms} room
+              </p>
+            </div>
+            <div>
+              <p className="text-gray-500">No Prepayment</p>
               <p className="text-black">
                 {mockData.adults} adults · {mockData.children} children ·{" "}
                 {mockData.rooms} room
