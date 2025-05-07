@@ -4,7 +4,6 @@ import profileIcon from "../assets/profile-icon.svg";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../api";
 
-// MOCK API DATA
 const filterRenames = {
   "Location": "location",
   "Price Range": "price",
@@ -17,9 +16,9 @@ const filterRenames = {
   "No Prepayment": "no_prepayment",
 };
 
+// MOCK API DATA
 const MOCK_API_DATA = {
-  Location: ["New York", "Paris", "Tokyo", "Cairo", "London", "Berlin", "Rome"],
-  "Location": ["New York", "Paris", "Tokyo", "Cairo"],
+  "Location": ["New York", "Paris", "Tokyo", "Cairo", "London", "Berlin", "Rome"],
   "Price Range": ["$50 - $100", "$100 - $200", "$200+"],
   "Money Currency": ["SAR"],
   "Rating": ["1 Star", "2 Stars", "3 Stars", "4 Stars", "5 Stars"],
@@ -42,8 +41,44 @@ export default function Filter() {
   const [activeFilter, setActiveFilter] = useState(null);
   const [selectedFilters, setSelectedFilters] = useState({});
   const [availableFilters, setAvailableFilters] = useState([]);
-
+  const [searchText, setSearchText] = useState("");
+  
   const navigate = useNavigate();
+
+
+  const reverseFilterRenames = Object.fromEntries(
+    Object.entries(filterRenames).map(([key, value]) => [value, key])
+  );
+  const reverseRenamedFilters = (filters) => {
+    return Object.entries(filters).reduce((acc, [key, value]) => {
+      const originalKey = reverseFilterRenames[key] || key; // Reverse the key
+      acc[originalKey] = value.map((item) =>
+        item === true ? "Yes" : item === false ? "No" : item // Reverse the value transformation
+      );
+      return acc;
+    }, {});
+  };
+
+  const setSelectedFiltersFromURL = () => {
+    const filters = api.getParamsFromURL();
+    const selectedFilters = Object.entries(filters).reduce((acc, [key, value]) => {
+      const renamedKey = filterRenames[key] || key;
+      acc[renamedKey] = value.split(",").map(
+        (item) => {
+            item = item.trim();
+            return item = item === "true" ? "Yes" : item === "false" ? "No" : item;
+          });
+      return acc;
+    }, {});
+
+    const reversedFilters = reverseRenamedFilters(selectedFilters);
+    
+    if (Object.keys(reversedFilters).length > 0) {
+      setSelectedFilters(reversedFilters);
+      // setActiveFilter(Object.keys(reversedFilters)[0]);
+      // setOptions(availableFilters[Object.keys(reversedFilters)[0]] || []);
+    }
+  };
 
   useEffect(() => {
     const fetchAvailableFilters = async () => {
@@ -79,9 +114,10 @@ export default function Filter() {
         setLoading(false);
       }
     };
-    fetchAvailableFilters();
+    fetchAvailableFilters().then(() => {
+      setSelectedFiltersFromURL();
+    });
   }, []);
-  const [searchText, setSearchText] = useState("");
 
   const handleFilterClick = async (filterType) => {
     setLoading(true);

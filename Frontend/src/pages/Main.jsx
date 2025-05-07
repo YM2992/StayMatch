@@ -13,15 +13,28 @@ import hotelthree from "../assets/three.webp";
 import hotelfour from "../assets/four.jpg";
 import api from "../api";
 
+const filterRenames = {
+  "Location": "location",
+  "Price Range": "price",
+  "Money Currency": "currency",
+  "Rating": "rating",
+  "Room Type": "room_type",
+  "Bed Info": "beds",
+  "Breakfast Included": "breakfast",
+  "Free Cancellation": "free_cancellation",
+  "No Prepayment": "no_prepayment",
+};
+const reverseFilterRenames = Object.fromEntries(
+  Object.entries(filterRenames).map(([key, value]) => [value, key])
+);
 function Main() {
   const navigate = useNavigate();
+  const [filters, setFilters] = useState({});
   const [searchResults, setSearchResults] = useState([]);
   const [favorites, setFavorites] = useState([]);
 
   const mockData = {
     destination: "Mecca",
-    checkIn: "2025-06-01",
-    checkOut: "2025-06-05",
     adults: 2,
     children: 1,
     rooms: 1,
@@ -34,12 +47,32 @@ function Main() {
     freeCancellation: true,
     noPrepayment: true,
   };
+  
+  
+  const reverseRenamedFilterKey = (filterKey) => {
+    return reverseFilterRenames[filterKey] || filterKey;
+  };
+
+  const reverseRenamedFilterValue = (filterValue) => {
+    filterValue = filterValue.toString().split(",").map(item => {
+      item = item.trim();
+      if (item === "true") return "Yes";
+      if (item === "false") return "No";
+      if (item === "breakfast") return "Breakfast Included";
+      if (item === "free_cancellation") return "Free Cancellation";
+      return item;
+    });
+    return filterValue.join(", ");
+  };
+
 
   const fetchHotels = async () => {
     try {
       const filters = api.getParamsFromURL();
 
       if (!filters) throw new Error("No filters found");
+
+      setFilters(filters);
 
       const cache = localStorage.getItem("cachedHotels");
       if (cache) {
@@ -127,68 +160,18 @@ function Main() {
           </p>
 
           <div className="bg-white text-black rounded-xl shadow p-4 grid grid-cols-1 md:grid-cols-4 gap-4 items-center text-sm font-medium">
-            {/* Mock filter info display */}
-            <div>
-              <p className="text-gray-500">Location</p>
-              <p className="text-black">{mockData.destination}</p>
-            </div>
-            <div>
-              <p className="text-gray-500">Check-in</p>
-              <p className="text-black">{mockData.checkIn}</p>
-            </div>
-            <div>
-              <p className="text-gray-500">Check-out</p>
-              <p className="text-black">{mockData.checkOut}</p>
-            </div>
-            <div>
-              <p className="text-gray-500">Guests</p>
-              <p className="text-black">
-                {mockData.adults} adults · {mockData.children} children ·{" "}
-                {mockData.rooms} room
-              </p>
-            </div>
-            <div>
-              <p className="text-gray-500">Price Range</p>
-              <p className="text-black">{mockData.priceRange}</p>
-            </div>
-            <div>
-              <p className="text-gray-500">Currency</p>
-              <p className="text-black">{mockData.currency}</p>
-            </div>
-            <div>
-              <p className="text-gray-500">Rating</p>
-              <p className="text-black">{mockData.rating}</p>
-            </div>
-            <div>
-              <p className="text-gray-500">Room Type</p>
-              <p className="text-black">{mockData.roomType}</p>
-            </div>
-            <div>
-              <p className="text-gray-500">Bed Info</p>
-              <p className="text-black">{mockData.bedInfo}</p>
-            </div>
-            <div>
-              <p className="text-gray-500">Breakfast Included</p>
-              <p className="text-black">
-                {mockData.breakfastIncluded ? "Yes" : "No"}
-              </p>
-            </div>
-            <div>
-              <p className="text-gray-500">Free Cancellation</p>
-              <p className="text-black">
-                {mockData.freeCancellation ? "Yes" : "No"}
-              </p>
-            </div>
-            <div>
-              <p className="text-gray-500">No Prepayment</p>
-              <p className="text-black">
-                {mockData.noPrepayment ? "Yes" : "No"}
-              </p>
-            </div>
+            {
+              Object.entries(filters).map(([key, value]) => (
+                <div key={key}>
+                  <p className="text-gray-500">{reverseRenamedFilterKey(key)}</p>
+                  <p className="text-black">{reverseRenamedFilterValue(value)}</p>
+                </div>
+              ))
+            }
 
             <button
               className="col-span-1 md:col-span-auto px-4 py-2 rounded-full flex items-center justify-center transition-transform bg-[#b0cde5] hover:bg-[#99bbdb] text-white hover:scale-105"
-              onClick={() => navigate("/filter")}
+              onClick={() => navigate(`/filter${window.location.search}`)}
             >
               <SearchIcon className="mr-2 h-4 w-4" />
               Back to Filters
@@ -208,7 +191,7 @@ function Main() {
               {searchResults.map((stay) => (
                 <a
                   key={stay.id}
-                  href={stay.link || "#"}
+                  href={stay.link || `https://www.google.com/search?q=${encodeURIComponent(stay.name)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex bg-white rounded-xl shadow overflow-hidden relative hover:scale-[1.01] transition-transform"
