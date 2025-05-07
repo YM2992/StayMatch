@@ -18,6 +18,7 @@ const filterRenames = {
 };
 
 const MOCK_API_DATA = {
+  Location: ["New York", "Paris", "Tokyo", "Cairo", "London", "Berlin", "Rome"],
   "Location": ["New York", "Paris", "Tokyo", "Cairo"],
   "Price Range": ["$50 - $100", "$100 - $200", "$200+"],
   "Money Currency": ["SAR"],
@@ -80,12 +81,14 @@ export default function Filter() {
     };
     fetchAvailableFilters();
   }, []);
+  const [searchText, setSearchText] = useState("");
 
   const handleFilterClick = async (filterType) => {
     setLoading(true);
     setError(null);
     setActiveFilter(filterType);
     setOptions([]);
+    setSearchText("");
 
     try {
       const fetchedOptions = availableFilters[filterType] || [];
@@ -102,6 +105,13 @@ export default function Filter() {
   };
 
   const handleOptionToggle = (filterType, option) => {
+    if (filterType === "Location") {
+      return setSelectedFilters((prev) => ({
+        ...prev,
+        [filterType]: [option],
+      }));
+    }
+
     setSelectedFilters((prev) => {
       const currentSelections = prev[filterType] || [];
       const isSelected = currentSelections.includes(option);
@@ -164,6 +174,10 @@ export default function Filter() {
     return selectedFilters[filterType]?.includes(option);
   };
 
+  const filteredOptions = options.filter((opt) =>
+    opt.toLowerCase().includes(searchText.toLowerCase())
+  );
+
   return (
     <div className="min-h-screen w-full flex justify-center items-center bg-gradient-to-br from-[#3a506b] to-[#1c1c2b] p-6">
       <div className="bg-gray-100 p-8 rounded-xl shadow-md w-full max-w-6xl">
@@ -213,6 +227,37 @@ export default function Filter() {
             </p>
           ) : error ? (
             <p className="text-md text-red-500 text-center">{error}</p>
+          ) : activeFilter === "Location" ? (
+            <div className="relative w-full max-w-xs mx-auto">
+              <input
+                type="text"
+                placeholder="Search locations..."
+                className="w-full p-2 border border-gray-300 rounded-md text-gray-800"
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+              />
+              <div className="absolute top-full left-0 w-full mt-1 border border-gray-300 rounded-md max-h-48 overflow-y-auto bg-white shadow-lg z-10">
+                {filteredOptions.length > 0 ? (
+                  filteredOptions.map((option) => (
+                    <div
+                      key={option}
+                      className={`px-4 py-2 cursor-pointer hover:bg-gray-200 ${
+                        isOptionSelected("Location", option)
+                          ? "bg-[#1a4467] text-white"
+                          : "text-gray-800"
+                      }`}
+                      onClick={() => handleOptionToggle("Location", option)}
+                    >
+                      {option}
+                    </div>
+                  ))
+                ) : (
+                  <div className="px-4 py-2 text-gray-500 text-sm text-center">
+                    No results
+                  </div>
+                )}
+              </div>
+            </div>
           ) : (
             <div className="flex flex-wrap gap-4 justify-center">
               {options.map((option) => (
