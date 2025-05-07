@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { SearchIcon, Star, StarIcon } from "lucide-react"; // Star = outline, StarIcon = filled
+import { SearchIcon, Star, StarIcon } from "lucide-react";
 
 import jeddahImg from "../assets/jeddah.jpg";
 import meccaImg from "../assets/mecca.webp";
