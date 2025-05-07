@@ -212,10 +212,13 @@ function Main() {
                   rel="noopener noreferrer"
                   className="flex bg-white rounded-xl shadow overflow-hidden relative hover:scale-[1.01] transition-transform"
                 >
-                  {/* Favorite Star */}
                   <div
                     className="absolute top-2 right-2 cursor-pointer z-10"
-                    onClick={() => toggleFavorite(stay.id)}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      toggleFavorite(stay.id);
+                    }}
                   >
                     {favorites.includes(stay.id) ? (
                       <StarIcon className="text-yellow-400" />
