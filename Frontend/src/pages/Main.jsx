@@ -207,7 +207,7 @@ function Main() {
                     }}
                   >
                     {favorites.includes(stay.id) ? (
-                      <StarIcon className="text-yellow-400" />
+                      <StarIcon className="text-yellow-400 fill-current" />
                     ) : (
                       <Star className="text-gray-400" />
                     )}
