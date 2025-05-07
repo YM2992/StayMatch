@@ -75,24 +75,43 @@ hotelHandler.getHotels = async function(filters) {
         }
     }
     if (room_type) {
-        filterConditions.push('room_type = @room_type');
-        params.push({ name: 'room_type', type: 'varchar', value: room_type });
+        const roomTypes = room_type.split(',').map(rt => rt.trim());
+        filterConditions.push(`room_type IN (${roomTypes.map((_, i) => `@room_type${i}`).join(', ')})`);
+        roomTypes.forEach((rt, i) => {
+            params.push({ name: `room_type${i}`, type: 'varchar', value: rt });
+        });
     }
     if (beds) {
-        filterConditions.push('beds >= @beds');
-        params.push({ name: 'beds', type: 'varchar', value: beds });
+        const bedsValues = beds.split(',').map(b => b.trim());
+        filterConditions.push(`beds IN (${bedsValues.map((_, i) => `@beds${i}`).join(', ')})`);
+        bedsValues.forEach((b, i) => {
+            params.push({ name: `beds${i}`, type: 'varchar', value: b });
+        });
     }
     if (breakfast != null) {
-        filterConditions.push('breakfast = @breakfast');
-        params.push({ name: 'breakfast', type: 'bit', value: breakfast });
+        const breakfastValues = breakfast.split(',').map(b => b.trim());
+        filterConditions.push(`breakfast IN (${breakfastValues.map((_, i) => `@breakfast${i}`).join(', ')})`);
+        breakfastValues.forEach((b, i) => {
+            params.push({ name: `breakfast${i}`, type: 'bit', value: b === 'true' });
+        });
     }
     if (free_cancellation != null) {
-        filterConditions.push('free_cancellation = @free_cancellation');
-        params.push({ name: 'free_cancellation', type: 'bit', value: free_cancellation });
+        const freeCancellationValues = free_cancellation.split(',').map(fc => fc.trim());
+        filterConditions.push(`free_cancellation IN (${freeCancellationValues.map((_, i) => `@free_cancellation${i}`).join(', ')})`);
+        freeCancellationValues.forEach((fc, i) => {
+            params.push({ name: `free_cancellation${i}`, type: 'bit', value: fc === 'true' });
+        });
     }
     if (no_prepayment != null) {
-        filterConditions.push('no_prepayment = @no_prepayment');
-        params.push({ name: 'no_prepayment', type: 'bit', value: no_prepayment });
+        const noPrepaymentValues = no_prepayment.split(',').map(np => np.trim());
+        filterConditions.push(`no_prepayment IN (${noPrepaymentValues.map((_, i) => `@no_prepayment${i}`).join(', ')})`);
+        noPrepaymentValues.forEach((np, i) => {
+            params.push({ name: `no_prepayment${i}`, type: 'bit', value: np === 'true' });
+        });
+    }
+
+    if (filterConditions.length === 0) {
+        return await executeQuery('SELECT * FROM [dbo].[Hotel]');
     }
 
     const query = `

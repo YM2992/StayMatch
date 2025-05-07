@@ -12,6 +12,7 @@ import hoteltwo from "../assets/two.jpeg";
 import hotelthree from "../assets/three.webp";
 import hotelfour from "../assets/four.jpg";
 import api from "../api";
+import toast from "react-hot-toast";
 
 const filterRenames = {
   "Location": "location",
@@ -101,7 +102,7 @@ function Main() {
       console.log("No timely cached data found. Fetching hotels from API");
 
       const response = await api.httpGet(api.paths.getHotels, filters);
-      if (response.status !== 200) throw new Error("Failed to fetch hotels");
+      if (!response || response.status !== 200) throw new Error("Failed to fetch hotels");
       const hotels = response.data.hotels;
       if (!hotels) throw new Error("No hotels found");
 
@@ -111,6 +112,7 @@ function Main() {
       return hotels;
     } catch (error) {
       console.error("Error fetching hotels:", error);
+      toast.error(error.message);
     }
   };
 

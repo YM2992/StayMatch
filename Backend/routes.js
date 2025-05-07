@@ -111,6 +111,7 @@ const routes = [
 
                 return res.status(200).json({ hotels });
             } catch (error) {
+                console.error('Error fetching hotels:', error);
                 return res.status(500).json({ error: error.message || 'An error occurred while fetching hotels' });
             }
         }
