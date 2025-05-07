@@ -16,7 +16,8 @@ import toast from "react-hot-toast";
 
 const filterRenames = {
   "Location": "location",
-  "Price Range": "price",
+  "Min Price": "min_price",
+  "Max Price": "max_price",
   "Money Currency": "currency",
   "Rating": "rating",
   "Room Type": "room_type",
@@ -133,6 +134,7 @@ function Main() {
   }, []);
 
   const toggleFavorite = (id) => {
+    console.log(id);
     setFavorites((prev) =>
       prev.includes(id) ? prev.filter((favId) => favId !== id) : [...prev, id]
     );
@@ -192,7 +194,7 @@ function Main() {
             <div className="grid gap-6 md:grid-cols-2">
               {searchResults.map((stay) => (
                 <a
-                  key={stay.id}
+                  key={stay.Hotel_ID}
                   href={stay.link || `https://www.google.com/search?q=${encodeURIComponent(stay.name)}`}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -203,10 +205,10 @@ function Main() {
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      toggleFavorite(stay.id);
+                      toggleFavorite(stay.Hotel_ID);
                     }}
                   >
-                    {favorites.includes(stay.id) ? (
+                    {favorites.includes(stay.Hotel_ID) ? (
                       <StarIcon className="text-yellow-400 fill-current" />
                     ) : (
                       <Star className="text-gray-400" />
@@ -232,11 +234,11 @@ function Main() {
                       <div>
                         {stay.originalPrice && (
                           <span className="text-sm text-gray-500 line-through">
-                            AUD {stay.originalPrice}
+                            {stay.originalPrice} {stay.currency}
                           </span>
                         )}
                         <p className="text-lg font-bold text-[#1c1c2b]">
-                          AUD {stay.price}
+                          {stay.price} {stay.currency}
                         </p>
                       </div>
                       <div className="text-right">

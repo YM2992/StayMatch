@@ -91,14 +91,15 @@ const routes = [
         path: `${apiPath}/hotels`,
         method: 'get',
         handler: async (req, res) => {
-            const { name, location, price, currency, rating, room_type, beds, breakfast, free_cancellation, no_prepayment } = req.query;
+            const { name, location, min_price, max_price, currency, rating, room_type, beds, breakfast, free_cancellation, no_prepayment } = req.query;
             console.log(req.query)
 
             try {
                 const filters = {};
                 if (name) filters.name = name;
                 if (location) filters.location = location;
-                if (price) filters.price = price;
+                if (min_price) filters.min_price = min_price;
+                if (max_price) filters.max_price = max_price;
                 if (currency) filters.currency = currency;
                 if (rating) filters.rating = rating;
                 if (room_type) filters.room_type = room_type;

@@ -37,7 +37,7 @@ hotelHandler.insertHotels = async function(hotelData) {
 }
 
 hotelHandler.getHotels = async function(filters) {    
-    const { name, location, price, currency, rating, room_type, beds, breakfast, free_cancellation, no_prepayment } = filters;
+    const { name, location, min_price, max_price, currency, rating, room_type, beds, breakfast, free_cancellation, no_prepayment } = filters;
 
     // Build a filter object based on provided query parameters
     const filterConditions = [];
@@ -51,9 +51,13 @@ hotelHandler.getHotels = async function(filters) {
         filterConditions.push('location LIKE @location');
         params.push({ name: 'location', type: 'varchar', value: `%${location}%` });
     }
-    if (price) {
-        filterConditions.push('price <= @price');
-        params.push({ name: 'price', type: 'float', value: price });
+    if (min_price) {
+        filterConditions.push('price >= @min_price');
+        params.push({ name: 'min_price', type: 'int', value: parseInt(min_price) });
+    }
+    if (max_price) {
+        filterConditions.push('price <= @max_price');
+        params.push({ name: 'max_price', type: 'int', value: parseInt(max_price) });
     }
     if (currency) {
         filterConditions.push('currency = @currency');

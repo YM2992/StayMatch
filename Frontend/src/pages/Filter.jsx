@@ -6,7 +6,8 @@ import api from "../api";
 
 const filterRenames = {
   "Location": "location",
-  "Price Range": "price",
+  "Min Price": "min_price",
+  "Max Price": "max_price",
   "Money Currency": "currency",
   "Rating": "rating",
   "Room Type": "room_type",
@@ -93,7 +94,8 @@ export default function Filter() {
         if (!filters) throw new Error("No filters found");
         let collatedFilters = {
           "Location": filters.locations,
-          "Price Range": MOCK_API_DATA["Price Range"],
+          "Min Price": filters.min_price,
+          "Max Price": filters.max_price,
           "Money Currency": filters.currencies,
           "Rating": MOCK_API_DATA["Rating"],
           "Room Type": filters.room_types,
@@ -292,6 +294,51 @@ export default function Filter() {
                     No results
                   </div>
                 )}
+              </div>
+            </div>
+          ) : activeFilter === "Price Range" ? (
+            <div className="flex flex-col items-center gap-4">
+              <div className="flex items-center gap-2">
+                <label htmlFor="minPrice" className="text-gray-800">
+                  Min:
+                </label>
+                <input
+                  id="minPrice"
+                  type="number"
+                  placeholder="Min Price"
+                  className="w-24 p-2 border border-gray-300 rounded-md text-gray-800"
+                  value={selectedFilters["Min Price"]?.[0] || ""}
+                  onChange={(e) => {
+                    const value = Math.max(0, e.target.value); // Prevent negative values
+                    setSelectedFilters((prev) => ({
+                      ...prev,
+                      "Min Price": [
+                        value,
+                      ],
+                    }));
+                  }}
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <label htmlFor="maxPrice" className="text-gray-800">
+                  Max:
+                </label>
+                <input
+                  id="maxPrice"
+                  type="number"
+                  placeholder="Max Price"
+                  className="w-24 p-2 border border-gray-300 rounded-md text-gray-800"
+                  value={selectedFilters["Max Price"]?.[0] || ""}
+                  onChange={(e) => {
+                    const value = Math.max(0, e.target.value); // Prevent negative values
+                    setSelectedFilters((prev) => ({
+                      ...prev,
+                      "Max Price": [
+                        value
+                      ],
+                    }));
+                  }}
+                />
               </div>
             </div>
           ) : (
