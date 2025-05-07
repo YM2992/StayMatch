@@ -108,59 +108,56 @@ async function main() {
     downloadKaggleData();
     await TripAdvisor.downloadTripAdvisorData(extractedDir);
     
-    // Upload all Backend/data files to Azure Blob Storage
-    if (AZURE_ENABLED) {
-        await new Promise((resolve, reject) => {
-            fs.readdir(extractedDir, (err, files) => {
-                if (err) {
-                    console.error('Error reading directory:', err);
-                    reject(err);
-                    return;
-                }
-                const uploadPromises = files.map(file => {
-                    const filePath = `${extractedDir}/${file}`;
-                    return Azure.uploadBlobFile(file, filePath)
-                        .then(() => {
-                            console.log(`File ${file} uploaded successfully`);
-                        })
-                        .catch(err => {
-                            console.error(`Error uploading file ${file}:`, err);
-                            throw err;
-                        });
-                });
-                Promise.all(uploadPromises)
-                    .then(() => resolve())
-                    .catch(reject);
-            });
-        });
+        // // Upload all Backend/data files to Azure Blob Storage
+        // await new Promise((resolve, reject) => {
+        //     fs.readdir(extractedDir, (err, files) => {
+        //         if (err) {
+        //             console.error('Error reading directory:', err);
+        //             reject(err);
+        //             return;
+        //         }
+        //         const uploadPromises = files.map(file => {
+        //             const filePath = `${extractedDir}/${file}`;
+        //             return Azure.uploadBlobFile(file, filePath)
+        //                 .then(() => {
+        //                     console.log(`File ${file} uploaded successfully`);
+        //                 })
+        //                 .catch(err => {
+        //                     console.error(`Error uploading file ${file}:`, err);
+        //                     throw err;
+        //                 });
+        //         });
+        //         Promise.all(uploadPromises)
+        //             .then(() => resolve())
+        //             .catch(reject);
+        //     });
+        // });
         
-        // Download all blobs from Azure Blob Storage to Backend/data/blob
-        await Azure.listBlobs().then(async blobs => {
-            for (const blob of blobs) {
-                try {
-                    const content = await Azure.fetchBlob(blob.Name);
-                    const filePath = `Backend/data/blob/blob_${blob.Name}`;
-                    await fs.promises.writeFile(filePath, content);
-                    console.log(`Blob ${blob.Name} saved to file: ${filePath}`);
-                } catch (err) {
-                    console.error(`Error processing blob ${blob.Name}:`, err);
-                }
+    // Download all blobs from Azure Blob Storage to Backend/data/blob
+    await Azure.listBlobs().then(async blobs => {
+        for (const blob of blobs) {
+            try {
+                const content = await Azure.fetchBlob(blob.Name);
+                const filePath = `Backend/data/blob/blob_${blob.Name}`;
+                await fs.promises.writeFile(filePath, content);
+                console.log(`Blob ${blob.Name} saved to file: ${filePath}`);
+            } catch (err) {
+                console.error(`Error processing blob ${blob.Name}:`, err);
             }
-            console.log('List of blobs:', blobs);
-        }).catch(err => {
-            console.error('Error listing blobs:', err);
-        });
-    }
+        }
+        console.log('List of blobs:', blobs);
+    }).catch(err => {
+        console.error('Error listing blobs:', err);
+    });
 
     // call the Python booking scraper 
-    console.log('🚀 Launching booking_scraper.py …');
-    try {
-      await runBookingScraper();
-    } catch (err) {
-      console.error('🛑 booking scraper failed:', err);
-    }
+    // console.log('🚀 Launching booking_scraper.py …');
+    // try {
+    //   await runBookingScraper();
+    // } catch (err) {
+    //   console.error('🛑 booking scraper failed:', err);
+    // }
     
-        
     // REFINE: Refine/transform the data
     const inputDir = AZURE_ENABLED ? blobDir : extractedDir;
     const outputDir = refinedDir;
