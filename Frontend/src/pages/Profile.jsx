@@ -5,18 +5,56 @@ import eyeOffIcon from "../assets/eye-off.svg";
 import profileIcon from "../assets/profile-icon.svg";
 import homeIcon from "../assets/home-icon.svg";
 import { useAppContext } from "../context/Context";
+import api from "../api";
+import { Star } from "lucide-react";
 
 function Profile() {
-    const { authDetails } = useAppContext();
+    const { authDetails, preferences, updatePreferences } = useAppContext();
     const [activeTab, setActiveTab] = useState("preferences");
     const [showPassword, setShowPassword] = useState(false);
     const [email, setEmail] = useState("");
+    const [hotelInfo, setHotelInfo] = useState([]);
 
     useEffect(() => {
         if (authDetails) {
             setEmail(authDetails.email || "");
         }
     }, [authDetails]);
+
+    const getHotelInfoFromPreferences = async (preferences) => {
+        const validHotelIDs = preferences
+            .map((pref) => pref)
+            .filter((id) => id); // Filter out empty or falsy Hotel_ID values
+
+        if (validHotelIDs.length === 0) {
+            return new Error("No valid Hotel_IDs found in preferences.");
+        }
+
+        return api.httpGet(api.paths.getHotels, {
+            return_keys: "Hotel_ID,name,location,price,rating",
+            Hotel_ID: validHotelIDs.join(",")
+        }).then((response) => {
+            if (response.status === 200) {
+                const hotels = response.data.hotels;
+                return hotels;
+            } else {
+                return new Error("Error fetching hotel info: " + response.data.error);
+            }
+        }).catch((error) => {
+            return new Error("Error fetching hotel info: " + error.message);
+        });
+    }
+
+    useEffect(() => {
+        getHotelInfoFromPreferences(preferences).then((hotels) => {
+            console.log("Hotels:", hotels);
+            if (!hotels) return;
+
+            setHotelInfo(hotels);
+        }).catch((error) => {
+            console.error("Error fetching hotel info:", error);
+        });
+    }, [preferences]);
 
     return (
         // <div className="flex justify-center items-center h-screen w-full bg-gradient-to-br from-[#3a506b] to-[#1c1c2b]">
@@ -110,18 +148,77 @@ function Profile() {
                         </div>
 
                         <ul className="space-y-3">
-                            <li className="border p-3 rounded-md shadow-sm flex justify-between">
-                                <span className="text-gray-900 font-medium">Hotel A</span>
-                                <span className="text-gray-900 font-medium">✕</span>
-                            </li>
-                            <li className="border p-3 rounded-md shadow-sm flex justify-between">
-                                <span className="text-gray-900 font-medium">Hotel B</span>
-                                <span className="text-gray-900 font-medium">✓</span>
-                            </li>
-                            <li className="border p-3 rounded-md shadow-sm flex justify-between">
-                                <span className="text-gray-900 font-medium">Hotel C</span>
-                                <span className="text-gray-900 font-medium">★</span>
-                            </li>
+                            {(hotelInfo && hotelInfo.length > 0) ? hotelInfo.map((hotel) => (
+                                <li key={hotel.Hotel_ID} className="border p-3 rounded-md shadow-sm flex justify-between">
+                                    <a 
+                                        href={`https://www.google.com/search?q=${encodeURIComponent(hotel.name)}`} 
+                                        target="_blank" 
+                                        rel="noopener noreferrer" 
+                                        className="flex-1 text-gray-900 font-medium"
+                                    >
+                                        <div>
+                                            <div className="flex items-center">
+                                                {hotel.name}
+                                                <span className="ml-2 flex">
+                                                    {Array.from({ length: 5 }, (_, i) => {
+                                                        const starValue = i + 1;
+                                                        if (hotel.rating / 2 >= starValue) {
+                                                            // Full star
+                                                            return (
+                                                                <Star
+                                                                    key={i}
+                                                                    className="h-4 w-4 text-yellow-500 fill-current"
+                                                                />
+                                                            );
+                                                        } else {
+                                                            // Empty star
+                                                            return (
+                                                                <Star
+                                                                    key={i}
+                                                                    className="h-4 w-4 text-gray-300"
+                                                                />
+                                                            );
+                                                        }
+                                                    })}
+                                                </span>
+                                            </div>
+                                            <div className="text-sm text-gray-500 flex items-center mt-1">
+                                                <svg 
+                                                    xmlns="http://www.w3.org/2000/svg" 
+                                                    className="h-4 w-4 mr-1" 
+                                                    fill="none" 
+                                                    viewBox="0 0 24 24" 
+                                                    stroke="currentColor"
+                                                >
+                                                    <path 
+                                                        strokeLinecap="round" 
+                                                        strokeLinejoin="round" 
+                                                        strokeWidth={2} 
+                                                        d="M12 2C8.134 2 5 5.134 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.866-3.134-7-7-7zM12 11a2 2 0 110-4 2 2 0 010 4z" 
+                                                    />
+                                                </svg>
+                                                {hotel.location}
+                                            </div>
+                                            <div className="text-sm text-gray-500 mt-1">
+                                                Price: ${hotel.price}
+                                            </div>
+                                        </div>
+                                    </a>
+                                    <button 
+                                        onClick={() => {
+                                            const updatedPreferences = preferences.filter(pref => pref !== hotel.Hotel_ID);
+                                            updatePreferences(updatedPreferences);
+                                        }} 
+                                        className="text-gray-900 font-medium"
+                                    >
+                                        ✕
+                                    </button>
+                                </li>
+                            )) : (
+                                <li className="border p-3 rounded-md shadow-sm flex justify-between">
+                                    <span className="text-gray-900 font-medium">No preferences found</span>
+                                </li>
+                            )}
                         </ul>
                     </div>
                 </div>
