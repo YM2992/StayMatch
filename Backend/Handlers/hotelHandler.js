@@ -37,12 +37,20 @@ hotelHandler.insertHotels = async function(hotelData) {
 }
 
 hotelHandler.getHotels = async function(filters) {    
-    const { name, location, min_price, max_price, currency, rating, room_type, beds, breakfast, free_cancellation, no_prepayment } = filters;
+    const { return_keys, Hotel_ID, name, location, min_price, max_price, currency, rating, room_type, beds, breakfast, free_cancellation, no_prepayment } = filters;
 
-    // Build a filter object based on provided query parameters
+    const columns = return_keys ? return_keys.split(',').map(col => col.trim()) : ['*'];
     const filterConditions = [];
     const params = [];
 
+
+    if (Hotel_ID) {
+        const hotelIDs = Hotel_ID.split(',').map(id => id.trim());
+        filterConditions.push(`Hotel_ID IN (${hotelIDs.map((_, i) => `@Hotel_ID${i}`).join(', ')})`);
+        hotelIDs.forEach((id, i) => {
+            params.push({ name: `Hotel_ID${i}`, type: 'int', value: parseInt(id) });
+        });
+    }
     if (name) {
         filterConditions.push('name LIKE @name');
         params.push({ name: 'name', type: 'varchar', value: `%${name}%` });
@@ -119,7 +127,7 @@ hotelHandler.getHotels = async function(filters) {
     }
 
     const query = `
-        SELECT * 
+        SELECT ${columns.join(', ')}
         FROM [dbo].[Hotel] 
         WHERE ${filterConditions.join(' AND ')}
     `;

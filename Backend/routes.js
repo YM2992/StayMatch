@@ -91,11 +91,13 @@ const routes = [
         path: `${apiPath}/hotels`,
         method: 'get',
         handler: async (req, res) => {
-            const { name, location, min_price, max_price, currency, rating, room_type, beds, breakfast, free_cancellation, no_prepayment } = req.query;
+            const { return_keys, Hotel_ID, name, location, min_price, max_price, currency, rating, room_type, beds, breakfast, free_cancellation, no_prepayment } = req.query;
             console.log(req.query)
 
             try {
                 const filters = {};
+                if (return_keys) filters.return_keys = return_keys;
+                if (Hotel_ID) filters.Hotel_ID = Hotel_ID;
                 if (name) filters.name = name;
                 if (location) filters.location = location;
                 if (min_price) filters.min_price = min_price;
