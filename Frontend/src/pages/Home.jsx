@@ -46,11 +46,17 @@ function Home() {
       const response = await api.httpPost(api.paths.login, data);
 
       if (response.error) {
-        alert("Login failed: " + response.error);
-      } else {
-        alert("Login successful!");
-        navigate("/filter");
+        return alert("Login failed: " + response.error);
       }
+
+      if (!response.user) {
+        return alert("Login failed: User not found.");
+      }
+      
+      localStorage.setItem("user", JSON.stringify(response.user));
+
+      alert("Login successful!");
+      navigate("/filter");
     }
   };
 

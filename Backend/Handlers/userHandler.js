@@ -1,4 +1,7 @@
+const jwt = require('jsonwebtoken');
+
 const { executeQuery } = require('../Modules/Azure');
+
 let userHandler = {};
 
 // Get user by email
@@ -22,7 +25,22 @@ userHandler.getUserByEmail = async function(email) {
 }
 
 // Authenticate user
-userHandler.authenticateUser = async function(email, password) {
+userHandler.verifyUser = async function(userId, jwtToken) {
+    try {
+        const decoded = jwt.verify(jwtToken, process.env.JWT_SECRET);
+        if (decoded.userId !== userId) {
+            console.error('Invalid token for user:', userId);
+            return null;
+        }
+        return decoded;
+    } catch (err) {
+        console.error('Token verification failed:', err);
+        return null;
+    } 
+}
+
+// Login user
+userHandler.loginUser = async function(email, password) {
     const query = `
         SELECT * 
         FROM [dbo].[User] 
@@ -35,9 +53,24 @@ userHandler.authenticateUser = async function(email, password) {
 
     try {
         const result = await executeQuery(query, params);
-        return (result && result.length > 0) ? result[0].User_ID : null;
+
+        if (!result || result.length === 0) {
+            console.error('Invalid email or password:', email);
+            throw new Error('Invalid email or password');
+        }
+
+        // Generate JWT token
+        const token = jwt.sign({ userId: result[0].User_ID }, process.env.JWT_SECRET);
+        console.log('User logged in successfully:', result);
+
+        return {
+            userId: result[0].User_ID,
+            name: result[0].name,
+            email: result[0].email,
+            token: token
+        };
     } catch (err) {
-        console.error('Error authenticating user:', err);
+        console.error('User login error:', err);
         throw err;
     }
 }

@@ -1,5 +1,6 @@
 import userHandler from './Handlers/userHandler.js';
 import hotelHandler from './Handlers/hotelHandler.js';
+import preferenceHandler from './Handlers/preferenceHandler.js';
 
 const apiPath = '/api';
 const routes = [
@@ -34,8 +35,7 @@ const routes = [
             }
 
             try {
-                // Replace with actual authentication logic
-                const user = await userHandler.authenticateUser(email, password);
+                const user = await userHandler.loginUser(email, password);
 
                 if (!user) {
                     return res.status(401).json({ error: 'Invalid credentials' });
@@ -128,6 +128,27 @@ const routes = [
                 return res.status(200).json({ filters });
             } catch (error) {
                 return res.status(500).json({ error: error.message || 'An error occurred while fetching filters' });
+            }
+        }
+    },
+
+    /* Preferences */
+    {
+        path: `${apiPath}/preferences/add`,
+        method: 'post',
+        handler: async (req, res) => {
+            const { user, hotelId } = req.body;
+
+            if (!user || !hotelId) {
+                return res.status(400).json({ error: 'User and hotel ID are required' });
+            }
+
+            try {
+                await preferenceHandler.addPreference(user, hotelId);
+                return res.status(200).json({ message: 'Preference added successfully' });
+            } catch (error) {
+                console.error('Error adding preference:', error);
+                return res.status(500).json({ error: error.message || 'An error occurred while adding preference' });
             }
         }
     }
