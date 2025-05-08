@@ -1,4 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from "react";
+import api from "../api";
 
 // Create the AppContext
 const AppContext = createContext();
@@ -22,7 +23,19 @@ export const AppProvider = ({ children }) => {
     }
   }, []);
 
+  const loadPreferences = async (user) => {
+    const response = await api.httpPost(api.paths.getPreferences, {user});
+    if (response.error) {
+      return new Error("Failed to load preferences:" + response.error);
+    }
+    if (!response.preferences) {
+      return new Error("No preferences found for the user.");
+    }
+    updatePreferences(response.preferences, true);
+  }
+
   const getAuthDetails = () => authDetails;
+
   const updateAuthDetails = (user) => {
     if (!user) {
       console.error("Invalid authentication details provided");
@@ -38,8 +51,18 @@ export const AppProvider = ({ children }) => {
 
     localStorage.setItem("user", JSON.stringify(user));
     setAuthDetails(user);
+
+    setPreferences([]); // Reset preferences when updating auth details
+
+    try {
+      loadPreferences(user);
+    } catch (error) {
+      console.error("Error loading preferences:", error);
+    }
+
     return user;
   };
+
   const clearAuthDetails = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("preferences");
@@ -48,10 +71,29 @@ export const AppProvider = ({ children }) => {
   };
 
   // Function to set user preferences
-  const updatePreferences = (preferences) => {
+  const updatePreferences = (preferences, skipDbSave) => {
     if (!preferences) {
       console.error("Invalid preferences provided");
       return;
+    }
+
+    const existingPreferences = JSON.parse(localStorage.getItem("preferences")) || [];
+
+    if (!skipDbSave) {
+      const addedPreferences = preferences.filter(
+        (pref) => !existingPreferences.includes(pref)
+      );
+      const removedPreferences = existingPreferences.filter(
+        (pref) => !preferences.includes(pref)
+      );
+  
+      addedPreferences.forEach((hotelId) => {
+        api.httpPost(api.paths.addPreference, { user: authDetails, hotelId });
+      });
+  
+      removedPreferences.forEach((hotelId) => {
+        api.httpPost(api.paths.removePreference, { user: authDetails, hotelId });
+      });
     }
 
     localStorage.setItem("preferences", JSON.stringify(preferences));
@@ -74,11 +116,7 @@ export const AppProvider = ({ children }) => {
   );
 };
 
-// Custom hook to use the AppContext
 export const useAppContext = () => {
-  const context = useContext(AppContext);
-  if (!context) {
-    throw new Error("useAppContext must be used within an AppProvider");
-  }
-  return context;
+  return useContext(AppContext);
 };
+  

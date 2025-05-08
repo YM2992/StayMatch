@@ -11,6 +11,11 @@ const paths = {
     // Hotels
     getHotels: "hotels",
     getFilters: "hotels/getFilters",
+
+    // Preferences
+    getPreferences: "preferences/get",
+    addPreference: "preferences/add",
+    removePreference: "preferences/remove"
 }
 let functions = {}
 
@@ -35,7 +40,7 @@ functions.httpGet = async (url, params) => {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
-        },
+        }
     });
     const data = await response.json();
     return { status: response.status, data };

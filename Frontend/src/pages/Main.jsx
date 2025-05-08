@@ -123,7 +123,9 @@ function Main() {
       prev.includes(id) ? prev.filter((favId) => favId !== id) : [...prev, id]
     );
 
-    const updatedPreferences = preferences.includes(id)
+    const updatedPreferences = !preferences || preferences.length === 0
+      ? [id]
+      : preferences.includes(id)
       ? preferences.filter((favId) => favId !== id)
       : [...preferences, id];
     

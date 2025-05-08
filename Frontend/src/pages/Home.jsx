@@ -4,6 +4,7 @@ import logo from "../assets/logo.png";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../api";
 import { useAppContext } from "../context/Context";
+import toast from "react-hot-toast";
 
 function Home() {
   const { updateAuthDetails } = useAppContext();
@@ -58,7 +59,7 @@ function Home() {
       
       updateAuthDetails(response.user);
 
-      alert("Login successful!");
+      toast.success("Login successful!");
       navigate("/filter");
     }
   };

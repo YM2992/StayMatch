@@ -7,6 +7,7 @@ import Filter from "./pages/Filter";
 import Profile from "./pages/Profile";
 import ForgotPassword from "./pages/ForgotPassword";
 import Main from "./pages/Main";
+import NavBar from "./components/NavBar";
 
 function NonAuthProtectedRoute({ children, redirectTo }) {
   const user = JSON.parse(localStorage.getItem("user"));
@@ -32,6 +33,7 @@ function App() {
   return (
     <BrowserRouter>
       <Toaster />
+      <NavBar />
       <Routes>
         <Route path="/" element={
             <NonAuthProtectedRoute redirectTo="/filter">

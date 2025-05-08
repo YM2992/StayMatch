@@ -134,6 +134,25 @@ const routes = [
 
     /* Preferences */
     {
+        path: `${apiPath}/preferences/get`,
+        method: 'post',
+        handler: async (req, res) => {
+            const { user } = req.body;
+            
+            if (!user) {
+                return res.status(400).json({ error: 'User is required' });
+            }
+
+            try {
+                const preferences = await preferenceHandler.getPreferences(user);
+                return res.status(200).json({ preferences });
+            } catch (error) {
+                console.error('Error fetching preferences:', error);
+                return res.status(500).json({ error: error.message || 'An error occurred while fetching preferences' });
+            }
+        }
+    },
+    {
         path: `${apiPath}/preferences/add`,
         method: 'post',
         handler: async (req, res) => {
@@ -149,6 +168,25 @@ const routes = [
             } catch (error) {
                 console.error('Error adding preference:', error);
                 return res.status(500).json({ error: error.message || 'An error occurred while adding preference' });
+            }
+        }
+    },
+    {
+        path: `${apiPath}/preferences/remove`,
+        method: 'post',
+        handler: async (req, res) => {
+            const { user, hotelId } = req.body;
+
+            if (!user || !hotelId) {
+                return res.status(400).json({ error: 'User and hotel ID are required' });
+            }
+
+            try {
+                await preferenceHandler.removePreference(user, hotelId);
+                return res.status(200).json({ message: 'Preference removed successfully' });
+            } catch (error) {
+                console.error('Error removing preference:', error);
+                return res.status(500).json({ error: error.message || 'An error occurred while removing preference' });
             }
         }
     }

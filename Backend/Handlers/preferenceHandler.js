@@ -4,6 +4,30 @@ const userHandler = require('./userHandler');
 
 let preferenceHandler = {};
 
+preferenceHandler.getPreferences = async function(user) {
+    const verified = await userHandler.verifyUser(user.userId, user.token);
+    if (!verified) {
+        throw new Error('User verification failed');
+    }
+
+    const query = `
+        SELECT Hotel_ID 
+        FROM Preference 
+        WHERE User_ID = @userId
+    `;
+    const params = [
+        { name: 'userId', type: 'int', value: user.userId }
+    ];
+
+    try {
+        const result = await executeQuery(query, params);
+        return result.map(row => row.Hotel_ID);
+    } catch (err) {
+        console.error('Error fetching preferences:', err);
+        throw err;
+    }
+}
+
 preferenceHandler.addPreference = async function(user, hotelId) {
     const verified = await userHandler.verifyUser(user.userId, user.token);
     if (!verified) {
@@ -48,30 +72,6 @@ preferenceHandler.removePreference = async function(user, hotelId) {
         return { message: 'Preference removed successfully' };
     } catch (err) {
         console.error('Error removing preference:', err);
-        throw err;
-    }
-}
-
-preferenceHandler.getPreferences = async function(user) {
-    const verified = await userHandler.verifyUser(user.userId, user.token);
-    if (!verified) {
-        throw new Error('User verification failed');
-    }
-
-    const query = `
-        SELECT Hotel_ID 
-        FROM Preference 
-        WHERE User_ID = @userId
-    `;
-    const params = [
-        { name: 'userId', type: 'int', value: user.userId }
-    ];
-
-    try {
-        const result = await executeQuery(query, params);
-        return result.map(row => row.Hotel_ID);
-    } catch (err) {
-        console.error('Error fetching preferences:', err);
         throw err;
     }
 }
