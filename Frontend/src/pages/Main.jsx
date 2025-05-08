@@ -13,6 +13,7 @@ import hotelthree from "../assets/three.webp";
 import hotelfour from "../assets/four.jpg";
 import api from "../api";
 import toast from "react-hot-toast";
+import { useAppContext } from "../context/Context";
 
 const filterRenames = {
   "Location": "location",
@@ -30,27 +31,12 @@ const reverseFilterRenames = Object.fromEntries(
   Object.entries(filterRenames).map(([key, value]) => [value, key])
 );
 function Main() {
+  const { preferences, updatePreferences } = useAppContext();
   const navigate = useNavigate();
   const [filters, setFilters] = useState({});
   const [searchResults, setSearchResults] = useState([]);
   const [favorites, setFavorites] = useState([]);
 
-  const mockData = {
-    destination: "Mecca",
-    adults: 2,
-    children: 1,
-    rooms: 1,
-    priceRange: "2000 - 5000 SAR",
-    currency: "SAR",
-    rating: "8+",
-    roomType: "Deluxe Suite",
-    bedInfo: "1 King Bed + 1 Sofa Bed",
-    breakfastIncluded: true,
-    freeCancellation: true,
-    noPrepayment: true,
-  };
-  
-  
   const reverseRenamedFilterKey = (filterKey) => {
     return reverseFilterRenames[filterKey] || filterKey;
   };
@@ -66,7 +52,6 @@ function Main() {
     });
     return filterValue.join(", ");
   };
-
 
   const fetchHotels = async () => {
     try {
@@ -134,11 +119,21 @@ function Main() {
   }, []);
 
   const toggleFavorite = (id) => {
-    console.log(id);
     setFavorites((prev) =>
       prev.includes(id) ? prev.filter((favId) => favId !== id) : [...prev, id]
     );
+
+    const updatedPreferences = preferences.includes(id)
+      ? preferences.filter((favId) => favId !== id)
+      : [...preferences, id];
+    
+    updatePreferences(updatedPreferences);
   };
+
+  useEffect(() => {
+    const storedFavorites = preferences || [];
+    setFavorites(storedFavorites);
+  }, [preferences]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#3a506b] to-[#1c1c2b] flex items-center justify-center p-[5%]">
