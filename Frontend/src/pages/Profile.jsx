@@ -1,13 +1,22 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import eyeIcon from "../assets/eye.svg";
 import eyeOffIcon from "../assets/eye-off.svg";
 import profileIcon from "../assets/profile-icon.svg";
 import homeIcon from "../assets/home-icon.svg";
+import { useAppContext } from "../context/Context";
 
 function Profile() {
+    const { authDetails } = useAppContext();
     const [activeTab, setActiveTab] = useState("preferences");
     const [showPassword, setShowPassword] = useState(false);
+    const [email, setEmail] = useState("");
+
+    useEffect(() => {
+        if (authDetails) {
+            setEmail(authDetails.email || "");
+        }
+    }, [authDetails]);
 
     return (
         // <div className="flex justify-center items-center h-screen w-full bg-gradient-to-br from-[#3a506b] to-[#1c1c2b]">
@@ -48,7 +57,7 @@ function Profile() {
                         <div>
                             <label className="block text-sm font-medium text-gray-700">Email</label>
                             <div className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 bg-white text-gray-700 shadow-sm">
-                                user@example.com
+                                {email}
                             </div>
                         </div>
                         <div>

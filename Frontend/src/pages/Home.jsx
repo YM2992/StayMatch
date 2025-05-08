@@ -3,8 +3,11 @@ import { useState } from "react";
 import logo from "../assets/logo.png";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../api";
+import { useAppContext } from "../context/Context";
 
 function Home() {
+  const { updateAuthDetails } = useAppContext();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -53,7 +56,7 @@ function Home() {
         return alert("Login failed: User not found.");
       }
       
-      localStorage.setItem("user", JSON.stringify(response.user));
+      updateAuthDetails(response.user);
 
       alert("Login successful!");
       navigate("/filter");
