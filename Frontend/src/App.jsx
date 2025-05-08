@@ -4,8 +4,9 @@ import { Toaster } from "react-hot-toast";
 import Home from "./pages/Home";
 import Registration from "./pages/Registration";
 import Filter from "./pages/Filter";
-import Profile from "./pages/Profile"; 
+import Profile from "./pages/Profile";
 import ForgotPassword from "./pages/ForgotPassword";
+import Main from "./pages/Main";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
         <Route path="/filter" element={<Filter />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/main" element={<Main />} />
       </Routes>
     </BrowserRouter>
   );

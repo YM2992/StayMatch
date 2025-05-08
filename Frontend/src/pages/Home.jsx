@@ -1,7 +1,7 @@
 import Input from "../components/Input";
 import { useState } from "react";
 import logo from "../assets/logo.png";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import api from "../api";
 
 function Home() {
@@ -10,6 +10,8 @@ function Home() {
 
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
+
+  const navigate = useNavigate();
 
   const validate = () => {
     let isValid = true;
@@ -47,7 +49,7 @@ function Home() {
         alert("Login failed: " + response.error);
       } else {
         alert("Login successful!");
-        // Redirect to dashboard or perform other actions
+        navigate("/main");
       }
     }
   };
