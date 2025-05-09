@@ -22,6 +22,10 @@ function Profile() {
     }, [authDetails]);
 
     const getHotelInfoFromPreferences = async (preferences) => {
+        if (!preferences || preferences.length === 0) {
+            return new Error("No preferences found.");
+        }
+        
         const validHotelIDs = preferences
             .map((pref) => pref)
             .filter((id) => id); // Filter out empty or falsy Hotel_ID values
