@@ -9,8 +9,8 @@ import api from "../api";
 import { Star } from "lucide-react";
 
 function Profile() {
-    const { authDetails, preferences, updatePreferences } = useAppContext();
-    const [activeTab, setActiveTab] = useState("preferences");
+    const { authDetails, preferences, updatePreferences, clearAuthDetails } = useAppContext();
+    const [activeTab, setActiveTab] = useState("saved");
     const [showPassword, setShowPassword] = useState(false);
     const [email, setEmail] = useState("");
     const [hotelInfo, setHotelInfo] = useState([]);
@@ -25,7 +25,7 @@ function Profile() {
         if (!preferences || preferences.length === 0) {
             return new Error("No preferences found.");
         }
-        
+
         const validHotelIDs = preferences
             .map((pref) => pref)
             .filter((id) => id); // Filter out empty or falsy Hotel_ID values
@@ -107,7 +107,7 @@ function Profile() {
                                 <label className="block text-sm font-medium text-gray-700">Password</label>
                                 <div className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 bg-white text-gray-700 shadow-sm flex justify-between items-center">
                                     <span>{showPassword ? "p@ssw0rd" : "••••••••"}</span>
-                                    <button
+                                    {/* <button
                                         type="button"
                                         onClick={() => setShowPassword(!showPassword)}
                                         className="icon-btn ml-2 p-1"
@@ -117,10 +117,10 @@ function Profile() {
                                             alt={showPassword ? "Hide password" : "Show password"}
                                             className="h-5 w-5"
                                         />
-                                    </button>
+                                    </button> */}
                                 </div>
                             </div>
-                            <Link to="/forgot-password" className="text-sm text-blue-900 hover:underline mt-1 mb-4 block">
+                            <Link onClick={clearAuthDetails()} to="/forgot-password" className="text-sm text-blue-900 hover:underline mt-1 mb-4 block">
                                 Change password?
                             </Link>
                         </div>
@@ -129,7 +129,7 @@ function Profile() {
                     {/* Preferences Section */}
                     <div>
                         <div className="flex justify-between border-b mb-4">
-                            <button
+                            {/* <button
                                 className={`py-2 px-4 font-medium w-1/2 ${
                                     activeTab === "preferences"
                                         ? "bg-black text-white rounded-tl-md"
@@ -138,16 +138,16 @@ function Profile() {
                                 onClick={() => setActiveTab("preferences")}
                             >
                                 Selected Preferences
-                            </button>
+                            </button> */}
                             <button
-                                className={`py-2 px-4 font-medium w-1/2 ${
+                                className={`py-2 px-4 font-medium w-1/1 ${
                                     activeTab === "saved"
                                         ? "bg-black text-white rounded-tr-md"
                                         : "bg-gray-200 text-gray-700"
                                 }`}
                                 onClick={() => setActiveTab("saved")}
                             >
-                                Saved
+                                Favourited Hotels
                             </button>
                         </div>
 

@@ -68,7 +68,7 @@ function ForgotPassword() {
   };
 
   return (
-    <div className="flex justify-center min-h-screen w-full bg-gradient-to-br from-[#3a506b] to-[#1c1c2b] py-20">
+    <div className="min-h-screen bg-gradient-to-br from-[#3a506b] to-[#1c1c2b] flex items-center justify-center p-[5%]">
       <div className="bg-gray-100 p-8 rounded-xl shadow-md w-full max-w-sm relative">
         
         {/* Logo + Heading */}
@@ -148,12 +148,12 @@ function ForgotPassword() {
           Change Password
         </button>
 
-        <p className="text-center text-sm text-gray-700">
+        {/* <p className="text-center text-sm text-gray-700">
           Having problems?{" "}
           <a href="contact-us" className="text-blue-900">
             Contact us
           </a>
-        </p>
+        </p> */}
       </div>
     </div>
   );
