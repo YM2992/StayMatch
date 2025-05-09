@@ -182,12 +182,12 @@ function Registration() {
           Sign Up
         </button>
 
-        <p className="text-center text-sm text-gray-700">
+        {/* <p className="text-center text-sm text-gray-700">
           Having problems?{" "}
           <a href="contact-us" className="text-blue-900">
             Contact us
           </a>
-        </p>
+        </p> */}
       </div>
     </div>
   );
