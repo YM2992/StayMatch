@@ -11,11 +11,12 @@ const paths = {
     // Hotels
     getHotels: "hotels",
     getFilters: "hotels/getFilters",
+    getHotelImages: "hotels/getImages",
 
     // Preferences
     getPreferences: "preferences/get",
     addPreference: "preferences/add",
-    removePreference: "preferences/remove"
+    removePreference: "preferences/remove",
 }
 let functions = {}
 

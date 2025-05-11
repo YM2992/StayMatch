@@ -1,6 +1,8 @@
 import userHandler from './Handlers/userHandler.js';
 import hotelHandler from './Handlers/hotelHandler.js';
 import preferenceHandler from './Handlers/preferenceHandler.js';
+import axios from 'axios';
+import * as cheerio from 'cheerio';
 
 const apiPath = '/api';
 const routes = [
@@ -133,6 +135,31 @@ const routes = [
             }
         }
     },
+    {
+        path: `${apiPath}/hotels/getImages`,
+        method: 'get',
+        handler: async (req, res) => {
+            try {
+                const response = await axios.get(`https://www.google.com/search?q=Hotel%20Jeddah&tbm=isch`);
+                const html = response.data;
+                const $ = cheerio.load(html);
+                const imageElements = $('img');
+                const imageUrls = [];
+
+                imageElements.each((index, element) => {
+                    const imageUrl = $(element).attr('src') || $(element).attr('data-src');
+                    if (imageUrl && imageUrl.startsWith('http')) {
+                        imageUrls.push(imageUrl);
+                    }
+                });
+
+                return res.status(200).json({ data: imageUrls });
+            } catch (error) {
+                console.error('Error fetching images:', error);
+                return res.status(500).json({ error: error.message || 'An error occurred while fetching images' });
+            }
+        }
+    },
 
     /* Preferences */
     {
@@ -140,7 +167,7 @@ const routes = [
         method: 'post',
         handler: async (req, res) => {
             const { user } = req.body;
-            
+
             if (!user) {
                 return res.status(400).json({ error: 'User is required' });
             }

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SearchIcon, Star, StarIcon } from "lucide-react";
 
+
 import jeddahImg from "../assets/jeddah.jpg";
 import meccaImg from "../assets/mecca.webp";
 import medinaImg from "../assets/medina.jpg";
@@ -14,6 +15,35 @@ import hotelfour from "../assets/four.jpg";
 import api from "../api";
 import toast from "react-hot-toast";
 import { useAppContext } from "../context/Context";
+
+import hotel1 from "../assets/Hotels/hotel1.jpg";
+import hotel2 from "../assets/Hotels/hotel2.jpg";
+import hotel3 from "../assets/Hotels/hotel3.webp";
+import hotel4 from "../assets/Hotels/hotel4.jpg";
+import hotel5 from "../assets/Hotels/hotel5.jpg";
+import hotel6 from "../assets/Hotels/hotel6.jpg";
+import hotel7 from "../assets/Hotels/hotel7.jpg";
+import hotel8 from "../assets/Hotels/hotel8.jpg";
+import hotel9 from "../assets/Hotels/hotel9.jpg";
+import hotel10 from "../assets/Hotels/hotel10.jpg";
+
+
+const hotelImages = [
+  hotelone,
+  hoteltwo,
+  hotelthree,
+  hotelfour,
+  hotel1,
+  hotel2,
+  hotel3,
+  hotel4,
+  hotel5,
+  hotel6,
+  hotel7,
+  hotel8,
+  hotel9,
+  hotel10,
+];
 
 const filterRenames = {
   "Location": "location",
@@ -30,6 +60,7 @@ const filterRenames = {
 const reverseFilterRenames = Object.fromEntries(
   Object.entries(filterRenames).map(([key, value]) => [value, key])
 );
+
 function Main() {
   const { preferences, updatePreferences } = useAppContext();
   const navigate = useNavigate();
@@ -92,9 +123,17 @@ function Main() {
       const hotels = response.data.hotels;
       if (!hotels) throw new Error("No hotels found");
 
+      const searchedHotelImages = await api.httpGet(api.paths.getHotelImages);
+      const hotelImageUrls = (searchedHotelImages && searchedHotelImages.data) || [];
+      hotels.forEach((hotel) => {
+        hotel.image =
+          hotel.image ||
+          hotelImageUrls.data[Math.floor(Math.random() * hotelImageUrls.data.length)] ||
+          hotelImages[Math.floor(Math.random() * hotelImages.length)];
+      });
+
       const fetchedTime = new Date().toUTCString();
       localStorage.setItem("cachedHotels", JSON.stringify({ fetchedTime, filters, hotels }));
-
       return hotels;
     } catch (error) {
       console.error("Error fetching hotels:", error);
@@ -211,7 +250,7 @@ function Main() {
                       <Star className="text-gray-400" />
                     )}
                   </div>
-
+                  
                   <img
                     src={stay.image}
                     alt={stay.name}
@@ -249,7 +288,7 @@ function Main() {
                     </div>
                   </div>
                 </a>
-              ))}
+              ))};
             </div>
           </div>
 

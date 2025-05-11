@@ -6,7 +6,7 @@ console.log(`Server starting: ${currentTime}`);
 
 // Global flags
 const AZURE_ENABLED = false;
-const ETL_ENABLED = true; // Extract, Transform, Load process
+const ETL_ENABLED = false; // Extract, Transform, Load process
 
 // Importing required modules
 const express = require('express');
