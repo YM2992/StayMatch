@@ -113,7 +113,15 @@ async function main() {
     // Download Kaggle dataset and TripAdvisor data to Backend/data
     downloadKaggleData();
     await TripAdvisor.downloadTripAdvisorData(extractedDir);
-        
+    
+    // call the Python booking scraper 
+    console.log('🚀 Launching booking_scraper.py …');
+    try {
+      await runBookingScraper();
+    } catch (err) {
+      console.error('🛑 booking scraper failed:', err);
+    }
+    
     // Download all blobs from Azure Blob Storage to Backend/data/blob
     await Azure.listBlobs().then(async blobs => {
         for (const blob of blobs) {
@@ -131,13 +139,6 @@ async function main() {
         console.error('Error listing blobs:', err);
     });
 
-    // call the Python booking scraper 
-    console.log('🚀 Launching booking_scraper.py …');
-    try {
-      await runBookingScraper();
-    } catch (err) {
-      console.error('🛑 booking scraper failed:', err);
-    }
     
     /* TRANSFORM */
     // Refine/transform the data
@@ -187,6 +188,7 @@ async function main() {
                 const values = columns.map(col => `'${row[col].replace(/'/g, "''")}'`);
                 const updateSet = columns.map(col => `${col} = '${row[col].replace(/'/g, "''")}'`).join(', ');
     
+                // Inserts or updates the row in the SQL table
                 const query = `
                     MERGE INTO ${tableName} AS Target
                     USING (SELECT ${values.map((v, idx) => `${v} AS ${columns[idx]}`).join(', ')}) AS Source
@@ -201,12 +203,12 @@ async function main() {
                 await Azure.executeQuery(query);
             }
     
-            console.log(`✅ Processed batch ${i / batchSize + 1} of ${Math.ceil(rows.length / batchSize)}`);
+            console.log(`Processed batch ${i / batchSize + 1} of ${Math.ceil(rows.length / batchSize)}`);
         }
     
-        console.log(`✅ Successfully loaded all data into table: ${tableName}`);
+        console.log(`Successfully loaded all data into table: ${tableName}`);
     } catch (err) {
-        console.error('🔥 Error loading CSV to SQL:', err);
+        console.error('Error loading CSV to SQL:', err);
     }
 }
 
