@@ -26,6 +26,16 @@ import hotel7 from "../assets/Hotels/hotel7.jpg";
 import hotel8 from "../assets/Hotels/hotel8.jpg";
 import hotel9 from "../assets/Hotels/hotel9.jpg";
 import hotel10 from "../assets/Hotels/hotel10.jpg";
+import hotel11 from "../assets/Hotels/hotel11.jpg";
+import hotel12 from "../assets/Hotels/hotel12.jpg";
+import hotel13 from "../assets/Hotels/hotel13.webp";
+import hotel14 from "../assets/Hotels/hotel14.jpg";
+import hotel15 from "../assets/Hotels/hotel15.jpg";
+import hotel16 from "../assets/Hotels/hotel16.jpg";
+import hotel17 from "../assets/Hotels/hotel17.jpg";
+import hotel18 from "../assets/Hotels/hotel18.jpg";
+import hotel19 from "../assets/Hotels/hotel19.jpg";
+import hotel20 from "../assets/Hotels/hotel20.jpg";
 
 
 const hotelImages = [
@@ -43,6 +53,16 @@ const hotelImages = [
   hotel8,
   hotel9,
   hotel10,
+  hotel11,
+  hotel12,
+  hotel13,
+  hotel14,
+  hotel15,
+  hotel16,
+  hotel17,
+  hotel18,
+  hotel19,
+  hotel20
 ];
 
 const filterRenames = {
@@ -125,10 +145,15 @@ function Main() {
 
       const searchedHotelImages = await api.httpGet(api.paths.getHotelImages);
       const hotelImageUrls = (searchedHotelImages && searchedHotelImages.data) || [];
-      hotels.forEach((hotel) => {
+      hotelImageUrls.data.forEach((url) => {
+        if (!hotelImages.includes(url)) {
+          hotelImages.push(url);
+        }
+      });
+      hotels.forEach((hotel, index) => {
         hotel.image =
           hotel.image ||
-          hotelImageUrls.data[Math.floor(Math.random() * hotelImageUrls.data.length)] ||
+          (index < hotelImages.length ? hotelImages[index] : hotelImages[Math.floor(Math.random() * hotelImages.length)]) ||
           hotelImages[Math.floor(Math.random() * hotelImages.length)];
       });
 
