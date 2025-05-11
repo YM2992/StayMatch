@@ -256,7 +256,7 @@ function Main() {
               {searchResults.map((stay) => (
                 <a
                   key={stay.Hotel_ID}
-                  href={stay.link || `https://www.google.com/search?q=${encodeURIComponent(stay.name)}`}
+                  href={stay.link || `https://www.google.com/search?q=${encodeURIComponent(stay.name)} ${encodeURIComponent(stay.location)} hotel`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex bg-white rounded-xl shadow overflow-hidden relative hover:scale-[1.01] transition-transform"
