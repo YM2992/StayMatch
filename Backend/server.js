@@ -73,7 +73,7 @@ function runBookingScraper() {
       const scriptPath = path.join(__dirname, 'Modules', 'booking_scraper.py');
   
       const scraper = spawn(
-        'python', 
+        'py', 
         [ scriptPath ], 
         { stdio: 'inherit' }
       );
