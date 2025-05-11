@@ -120,7 +120,7 @@ function Profile() {
                                     </button> */}
                                 </div>
                             </div>
-                            <Link onClick={clearAuthDetails()} to="/forgot-password" className="text-sm text-blue-900 hover:underline mt-1 mb-4 block">
+                            <Link onClick={() => clearAuthDetails()} to="/forgot-password" className="text-sm text-blue-900 hover:underline mt-1 mb-4 block">
                                 Change password?
                             </Link>
                         </div>
