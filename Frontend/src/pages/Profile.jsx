@@ -155,7 +155,7 @@ function Profile() {
                             {(hotelInfo && hotelInfo.length > 0) ? hotelInfo.map((hotel) => (
                                 <li key={hotel.Hotel_ID} className="border p-3 rounded-md shadow-sm flex justify-between">
                                     <a 
-                                        href={`https://www.google.com/search?q=${encodeURIComponent(hotel.name)}`} 
+                                        href={`https://www.google.com/search?q=${encodeURIComponent(hotel.name)}  ${encodeURIComponent(hotel.location)} hotel`} 
                                         target="_blank" 
                                         rel="noopener noreferrer" 
                                         className="flex-1 text-gray-900 font-medium"
