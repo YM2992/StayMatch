@@ -1,273 +1,29 @@
 require('dotenv').config();
-const { spawn } = require('child_process');
-const currentTime = new Date();
-console.log(`Server starting: ${currentTime}`);
-
-
-// Global flags
-const AZURE_ENABLED = false;
-const ETL_ENABLED = false; // Extract, Transform, Load process
-
-// Importing required modules
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const routes = require('./routes').default;
+
+// Initialize Express app
 const app = express();
-const path = require('path');
-const csv = require('csv-parser');
 
 // Middleware for parsing request bodies
 app.use(cors({ origin: '*' }));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// import local modules
-const TripAdvisorAPI = require('./Modules/TripAdvisor');
-const Azure = require('./Modules/Azure');
-const Util = require('./Modules/Util');
-const downloadKaggleData = require('./Modules/fetchKaggleData');
-const refineCSV = require('./Modules/refineCSV');
-
-// initialising API modules
-const TripAdvisor = new TripAdvisorAPI(process.env.TRIPADVISOR_API_KEY);
-
-
-// API server
-const routes = require('./routes').default;
-const fs = require('fs');
-
+// Register routes
 routes.forEach(route => {
     app[route.method.toLowerCase()](route.path, route.handler);
 });
 
-
+// Start the server
 const PORT = process.env.SERVER_PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+    console.log(`Application server is running on port ${PORT}`);
 });
 
-
-// Create directories if they don't exist
-const extractedDir = 'Backend/data/extracted';
-const blobDir = 'Backend/data/blob';
-const refinedDir = 'Backend/data/refined';
-const finalDir = 'Backend/data/finaldata';
-
-if (!fs.existsSync(extractedDir)) {
-    fs.mkdirSync(extractedDir, { recursive: true });
-    console.log(`Created directory: ${extractedDir}`);
-}
-if (!fs.existsSync(blobDir)) {
-    fs.mkdirSync(blobDir, { recursive: true });
-    console.log(`Created directory: ${blobDir}`);
-}
-if (!fs.existsSync(refinedDir)) {
-    fs.mkdirSync(refinedDir, { recursive: true });
-    console.log(`Created directory: ${refinedDir}`);
-}
-
-// Python scraper 
-function runBookingScraper() {
-    return new Promise((resolve, reject) => {
-      // compute the absolute path to booking_scraper.py
-      const scriptPath = path.join(__dirname, 'Modules', 'booking_scraper.py');
-  
-      const scraper = spawn(
-        'py', 
-        [ scriptPath ], 
-        { stdio: 'inherit' }
-      );
-  
-      scraper.on('error', err => {
-        console.error('Failed to start booking_scraper.py:', err);
-        reject(err);
-      });
-  
-      scraper.on('close', code => {
-        if (code === 0) {
-          console.log('✅ booking_scraper.py finished successfully');
-          resolve();
-        } else {
-          reject(new Error(`booking_scraper.py exited with code ${code}`));
-        }
-      });
-    });
-  }
-  // ────────────────────────────────────────────────────────────────────────────
-
-async function main() {
-    // Check if Azure is enabled
-    if (!AZURE_ENABLED) {
-        console.log("Skip over Azure data upload");
-    }
-
-    // Connect to Azure SQL and Blob Storage
-    await Azure.connectToSQL();
-    await Azure.connectToBlob();
-
-    if (!ETL_ENABLED) {
-        return;
-    }
-
-    /* EXTRACT */
-    // Download Kaggle dataset and TripAdvisor data to Backend/data
-    downloadKaggleData();
-    await TripAdvisor.downloadTripAdvisorData(extractedDir);
-    
-    // call the Python booking scraper 
-    console.log('🚀 Launching booking_scraper.py …');
-    try {
-      await runBookingScraper();
-    } catch (err) {
-      console.error('🛑 booking scraper failed:', err);
-    }
-    
-    // Download all blobs from Azure Blob Storage to Backend/data/blob
-    await Azure.listBlobs().then(async blobs => {
-        for (const blob of blobs) {
-            try {
-                const content = await Azure.fetchBlob(blob.Name);
-                const filePath = `Backend/data/blob/blob_${blob.Name}`;
-                await fs.promises.writeFile(filePath, content);
-                console.log(`Blob ${blob.Name} saved to file: ${filePath}`);
-            } catch (err) {
-                console.error(`Error processing blob ${blob.Name}:`, err);
-            }
-        }
-        console.log('List of blobs:', blobs);
-    }).catch(err => {
-        console.error('Error listing blobs:', err);
-    });
-
-    
-    /* TRANSFORM */
-    // Refine/transform the data
-    const inputDir = AZURE_ENABLED ? blobDir : extractedDir;
-    const outputDir = refinedDir;
-
-    try {
-        const files = fs.readdirSync(inputDir).filter(file => file.endsWith('.csv'));
-
-        for (const file of files) {
-            const inputPath = path.join(inputDir, file);
-            const outputPath = path.join(outputDir, `refined_${file}`);
-            await refineCSV(inputPath, outputPath, file);
-        }
-    } catch (err) {
-        console.error('🔥 Error refining CSVs:', err);
-    }
-    
-
-    /* LOAD */
-    // Load the data to the SQL database
-    console.log('Loading data into SQL database...');
-    try {
-        const rows = [];
-        const columns = [];
-        const finalCsvPath = path.join(finalDir, 'merged_finaldata.csv');
-        const stream = fs.createReadStream(finalCsvPath).pipe(csv());
-        const tableName = 'Hotel';
-        const batchSize = 100; // Number of rows per batch
-    
-        // Read CSV file and collect rows
-        for await (const row of stream) {
-            if (columns.length === 0) {
-                // Extract column names from the first row
-                Object.keys(row).forEach(col => columns.push(col));
-            }
-            rows.push(row);
-        }
-    
-        console.log(`📄 Loaded ${rows.length} rows from ${finalCsvPath}`);
-    
-        // Insert or update rows into the SQL table in batches
-        for (let i = 0; i < rows.length; i += batchSize) {
-            const batch = rows.slice(i, i + batchSize);
-    
-            for (const row of batch) {
-                const values = columns.map(col => `'${row[col].replace(/'/g, "''")}'`);
-                const updateSet = columns.map(col => `${col} = '${row[col].replace(/'/g, "''")}'`).join(', ');
-    
-                // Inserts or updates the row in the SQL table
-                const query = `
-                    MERGE INTO ${tableName} AS Target
-                    USING (SELECT ${values.map((v, idx) => `${v} AS ${columns[idx]}`).join(', ')}) AS Source
-                    ON Target.name = Source.name
-                    WHEN MATCHED THEN
-                        UPDATE SET ${updateSet}
-                    WHEN NOT MATCHED THEN
-                        INSERT (${columns.join(', ')})
-                        VALUES (${values.join(', ')});
-                `;
-    
-                await Azure.executeQuery(query);
-            }
-    
-            console.log(`Processed batch ${i / batchSize + 1} of ${Math.ceil(rows.length / batchSize)}`);
-        }
-    
-        console.log(`Successfully loaded all data into table: ${tableName}`);
-    } catch (err) {
-        console.error('Error loading CSV to SQL:', err);
-    }
-}
-
-main().catch(err => {
-    console.error('Error in main function:', err);
-});
-
-
-
-/* TripAdvisor API usage example */
-// TripAdvisor.searchLocation("Jeddah").then(async data => {
-//     const locationDetails = await TripAdvisor.getLocationDetails(data.data[0].location_id);
-    
-//     await Util.jsonToCsvFile(locationDetails, 'data/tripadvisor.csv', {
-//         header: true,
-//         delimiter: ',',
-//         quote: '"',
-//         eol: '\n',
-//         columns: [
-//             'location_id',
-//             'name',
-//             'address_obj.street1',
-//             'address_obj.street2',
-//             'address_obj.city',
-//             'address_obj.state',
-//             'address_obj.country'
-//         ]
-//     }).then(() => {
-//         console.log('CSV file created successfully');
-//     }).catch(err => {
-//         console.error('Error creating CSV file:', err);
-//     });
-// });
-
-/* Azure API usage example */
-// Azure.connectToSQL().then(() => {
-//     Azure.executeQuery('SELECT * FROM TestTable').then(result => {
-//         console.log('Query result:', result);
-//     }).catch(err => {
-//         console.error('Error executing query:', err);
-//     });
-// });
-
-// Azure.connectToSQL().then(() => {
-//     // Azure.executeQuery('SELECT * FROM [dbo].[User];').then(result => {
-//     //     console.log('Query result:', result);
-//     // }).catch(err => {
-//     //     console.error('Error executing query:', err);
-//     // });
-//     Azure.getFromTable('[dbo].[User]').then(result => {
-//         console.log('Query result:', result);
-//     }).catch(err => {
-//         console.error('Error executing query:', err);
-//     });
-// });
-// Azure.connectToSQL().then(() => {
-//     Azure.executeQuery(`
-//         INSERT INTO [dbo].[user]
-//         ([first_name], [last_name], [email], [password])
-//         VALUES ('Jeag', 'HJeash', 'jeag.hjeash@domain.com', 'test123');
-// `);
-// });
+// Connect to Azure SQL
+const Azure = require('./Modules/Azure');
+Azure.connectToSQL()
+    .catch(err => console.error('Failed to connect to Azure SQL:', err));
