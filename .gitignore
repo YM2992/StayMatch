@@ -1,3 +1,7 @@
+# Local files
+Backend/data/**
+
+
 # Logs
 logs
 *.log

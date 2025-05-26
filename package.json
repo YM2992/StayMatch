@@ -2,18 +2,64 @@
   "name": "staymatch",
   "version": "1.0.0",
   "description": "A hotel and accommodation finder.",
+  "private": true,
   "scripts": {
-    "backend": "nodemon backend/server.js"
+    "backend": "nodemon backend/server.js",
+    "frontend": "vite frontend",
+    "dev": "vite frontend",
+    "build": "vite build",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "start": "concurrently \"npm run backend\" \"npm run frontend\"",
+    "etl": "node backend/etl.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "axios": "^1.8.4",
+    "@azure/identity": "^4.8.0",
+    "@azure/storage-blob": "^12.27.0",
+    "@tailwindcss/vite": "^4.0.17",
+    "axios": "^1.9.0",
+    "cheerio": "^1.0.0",
     "cors": "^2.8.5",
+    "csv-parser": "^3.2.0",
+    "date-fns": "^4.1.0",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "hotels-scraper-js": "^0.1.0",
+    "json-2-csv": "^5.5.9",
+    "json2csv": "^6.0.0-alpha.2",
+    "jsonwebtoken": "^9.0.2",
+    "lucide-react": "^0.507.0",
     "mssql": "^11.0.1",
-    "react": "^19.0.0"
-  }
+    "puppeteer": "^24.6.1",
+    "react": "^19.0.0",
+    "react-datepicker": "^8.3.0",
+    "react-dom": "^19.0.0",
+    "react-hot-toast": "^2.5.2",
+    "react-icons": "^5.5.0",
+    "react-router-dom": "^7.5.0",
+    "tailwindcss": "^4.0.17"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.21.0",
+    "@types/react": "^19.0.10",
+    "@types/react-dom": "^19.0.4",
+    "@vitejs/plugin-react": "^4.3.4",
+    "concurrently": "^9.1.2",
+    "eslint": "^9.21.0",
+    "eslint-plugin-react-hooks": "^5.1.0",
+    "eslint-plugin-react-refresh": "^0.4.19",
+    "globals": "^15.15.0",
+    "vite": "^6.2.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/YM2992/StayMatch.git"
+  },
+  "bugs": {
+    "url": "https://github.com/YM2992/StayMatch/issues"
+  },
+  "homepage": "https://github.com/YM2992/StayMatch#readme"
 }

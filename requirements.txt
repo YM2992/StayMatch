@@ -1,0 +1,8 @@
+selenium
+webdriver-manager
+beautifulsoup4
+pandas
+keyboard
+kaggle
+numpy>=1.22.4
+matplotlib
