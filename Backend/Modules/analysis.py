@@ -1,6 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Button
+import os
 
 # Load the CSV file containing hotel data
 def analyze_top_rated_hotels(csv_file_path, show_chart=False, output_image_path=None):
@@ -211,7 +212,8 @@ def show_toggling_graphs(csv_file_path):
     plt.show()
 
 # Example usage
-csv_file_path = r'c:\Users\yasir\Desktop\41091 Data Systems\StayMatch\Backend\data\finaldata\merged_finaldata.csv'  # Update with your CSV file path
+current_dir = os.path.dirname(__file__)
+csv_file_path = os.path.join(current_dir, '..', 'data', 'finaldata', 'merged_finaldata.csv')
 
 # Show the toggling UI
 show_toggling_graphs(csv_file_path)
